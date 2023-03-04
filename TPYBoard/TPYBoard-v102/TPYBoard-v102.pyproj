@@ -1,0 +1,154 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>84f654f0-0dfe-4e33-8a13-fd92633747ca</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>TPYBoard_v102.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>TPYBoard-v102</Name>
+    <RootNamespace>TPYBoard-v102</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="01.模拟红绿灯教程\main.py" />
+    <Compile Include="02.DIY金属检测仪\main.py" />
+    <Compile Include="03.DIY声光控小夜灯\main.py" />
+    <Compile Include="04.心形8x8点阵\main.py" />
+    <Compile Include="05.DIY温度计\ds18b20.py" />
+    <Compile Include="05.DIY温度计\main.py" />
+    <Compile Include="05.DIY温度计\onewire_lib.py" />
+    <Compile Include="06.驱动LCD5110显示6x8字符\font.py" />
+    <Compile Include="06.驱动LCD5110显示6x8字符\main.py" />
+    <Compile Include="06.驱动LCD5110显示6x8字符\upcd8544.py" />
+    <Compile Include="07.PM2.5检测仪制作\font.py" />
+    <Compile Include="07.PM2.5检测仪制作\main.py" />
+    <Compile Include="07.PM2.5检测仪制作\upcd8544.py" />
+    <Compile Include="08.DIY超声波测距仪\font.py" />
+    <Compile Include="08.DIY超声波测距仪\main.py" />
+    <Compile Include="08.DIY超声波测距仪\upcd8544.py" />
+    <Compile Include="09.DIY电子时钟\DS3231.py" />
+    <Compile Include="09.DIY电子时钟\font.py" />
+    <Compile Include="09.DIY电子时钟\main.py" />
+    <Compile Include="09.DIY电子时钟\upcd8544.py" />
+    <Compile Include="10.控制LCD5110显示温度时间%28中文版%29\chinese.py" />
+    <Compile Include="10.控制LCD5110显示温度时间%28中文版%29\DS3231.py" />
+    <Compile Include="10.控制LCD5110显示温度时间%28中文版%29\font.py" />
+    <Compile Include="10.控制LCD5110显示温度时间%28中文版%29\main.py" />
+    <Compile Include="10.控制LCD5110显示温度时间%28中文版%29\upcd8544.py" />
+    <Compile Include="11.学习使用OLED显示屏\font.py" />
+    <Compile Include="11.学习使用OLED显示屏\main.py" />
+    <Compile Include="11.学习使用OLED显示屏\ssd1306_lib.py" />
+    <Compile Include="12.控制LCD1602显示字符\main.py" />
+    <Compile Include="12.控制LCD1602显示字符\tpyb_gpio_lcd1602.py" />
+    <Compile Include="12.控制LCD1602显示字符\tpyb_lcd1602.py" />
+    <Compile Include="13.DIY智能温控小风扇\ds18b20.py" />
+    <Compile Include="13.DIY智能温控小风扇\main.py" />
+    <Compile Include="13.DIY智能温控小风扇\onewire_lib.py" />
+    <Compile Include="14.驱动舵机教程\main_servo.py" />
+    <Compile Include="14.驱动舵机教程\main_text.py" />
+    <Compile Include="15.红外防坠落小车\main.py" />
+    <Compile Include="16.红外寻迹无线小车\main.py" />
+    <Compile Include="17.无线蓝牙智能小车\main.py" />
+    <Compile Include="18.加速度无线小车\控制端\main.py" />
+    <Compile Include="18.加速度无线小车\被控制端\main.py" />
+    <Compile Include="31.线程和锁\main.py" />
+    <Compile Include="31.线程和锁\main_lock.py" />
+    <Compile Include="32.学习OLED显示中文\font.py" />
+    <Compile Include="32.学习OLED显示中文\main.py" />
+    <Compile Include="32.学习OLED显示中文\ssd1306_lib.py" />
+    <Compile Include="33.智能蓝牙+红外循迹小车\boot.py" />
+    <Compile Include="33.智能蓝牙+红外循迹小车\main.py" />
+    <Compile Include="34.驱动步进电机\main.py" />
+    <Compile Include="35.自动浇花系统\boot.py" />
+    <Compile Include="35.自动浇花系统\ds18b20.py" />
+    <Compile Include="35.自动浇花系统\main.py" />
+    <Compile Include="35.自动浇花系统\onewire_lib.py" />
+    <Compile Include="36.照相机\boot.py" />
+    <Compile Include="36.照相机\font.py" />
+    <Compile Include="36.照相机\main.py" />
+    <Compile Include="36.照相机\upcd8544.py" />
+    <Compile Include="37.结合ESP8266模块实现TCP通信\main.py" />
+    <Compile Include="38.结合ESP8266模块实现HTTP请求实例\GET\main.py" />
+    <Compile Include="38.结合ESP8266模块实现HTTP请求实例\POST\main.py" />
+    <Compile Include="39.驱动DHT11模块获取温湿度\dht11.py" />
+    <Compile Include="39.驱动DHT11模块获取温湿度\main.py" />
+    <Compile Include="40.制作女神表白神器\font_max7219.py" />
+    <Compile Include="40.制作女神表白神器\main.py" />
+    <Compile Include="40.制作女神表白神器\max7219.py" />
+    <Compile Include="41.TPYBoard心率监测器\font.py" />
+    <Compile Include="41.TPYBoard心率监测器\hrcalc.py" />
+    <Compile Include="41.TPYBoard心率监测器\main.py" />
+    <Compile Include="41.TPYBoard心率监测器\max30102.py" />
+    <Compile Include="41.TPYBoard心率监测器\ssd1306_lib.py" />
+    <Compile Include="42.温湿度短信通知器（SIM900A模块）\dht11.py" />
+    <Compile Include="42.温湿度短信通知器（SIM900A模块）\main.py" />
+    <Compile Include="43.串口屏实验\main.py" />
+    <Compile Include="TPYBoard_v102.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="01.模拟红绿灯教程\" />
+    <Folder Include="02.DIY金属检测仪\" />
+    <Folder Include="03.DIY声光控小夜灯\" />
+    <Folder Include="04.心形8x8点阵\" />
+    <Folder Include="05.DIY温度计\" />
+    <Folder Include="06.驱动LCD5110显示6x8字符\" />
+    <Folder Include="07.PM2.5检测仪制作\" />
+    <Folder Include="08.DIY超声波测距仪\" />
+    <Folder Include="09.DIY电子时钟\" />
+    <Folder Include="10.控制LCD5110显示温度时间%28中文版%29\" />
+    <Folder Include="11.学习使用OLED显示屏\" />
+    <Folder Include="12.控制LCD1602显示字符\" />
+    <Folder Include="13.DIY智能温控小风扇\" />
+    <Folder Include="14.驱动舵机教程\" />
+    <Folder Include="15.红外防坠落小车\" />
+    <Folder Include="16.红外寻迹无线小车\" />
+    <Folder Include="17.无线蓝牙智能小车\" />
+    <Folder Include="18.加速度无线小车\" />
+    <Folder Include="18.加速度无线小车\控制端\" />
+    <Folder Include="18.加速度无线小车\被控制端\" />
+    <Folder Include="31.线程和锁\" />
+    <Folder Include="32.学习OLED显示中文\" />
+    <Folder Include="33.智能蓝牙+红外循迹小车\" />
+    <Folder Include="34.驱动步进电机\" />
+    <Folder Include="35.自动浇花系统\" />
+    <Folder Include="36.照相机\" />
+    <Folder Include="37.结合ESP8266模块实现TCP通信\" />
+    <Folder Include="38.结合ESP8266模块实现HTTP请求实例\" />
+    <Folder Include="38.结合ESP8266模块实现HTTP请求实例\GET\" />
+    <Folder Include="38.结合ESP8266模块实现HTTP请求实例\POST\" />
+    <Folder Include="39.驱动DHT11模块获取温湿度\" />
+    <Folder Include="40.制作女神表白神器\" />
+    <Folder Include="41.TPYBoard心率监测器\" />
+    <Folder Include="42.温湿度短信通知器（SIM900A模块）\" />
+    <Folder Include="43.串口屏实验\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="33.智能蓝牙+红外循迹小车\README.txt" />
+    <Content Include="33.智能蓝牙+红外循迹小车\tpybcdc.inf" />
+    <Content Include="35.自动浇花系统\README.txt" />
+    <Content Include="35.自动浇花系统\tpybcdc.inf" />
+    <Content Include="36.照相机\pybcdc.inf" />
+    <Content Include="36.照相机\README.txt" />
+    <Content Include="README.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

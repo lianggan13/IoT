@@ -1,0 +1,309 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Raspberry.App.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:ap="clr-namespace:Raspberry.App.AttachedProperties"
+    xmlns:sys="clr-namespace:System;assembly=netstandard"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:Raspberry.App.ViewModels"
+    x:Name="mainPage"
+    Shell.NavBarIsVisible="False">
+    <ContentPage.BindingContext>
+        <vm:MainViewModel x:Name="vm" />
+    </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <toolkit:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter" />
+        <Style x:Key="Button.Style" TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="5" />
+            <!--<Setter Property="FontSize" Value="23" />-->
+            <!--<Setter Property="WidthRequest" Value="35" />
+            <Setter Property="HeightRequest" Value="35" />-->
+            <Setter Property="TextColor" Value="#FFF4F4F4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderWidth" Value="1" />
+            <Setter Property="BorderColor" Value="#FFF4F4F4" />
+            <Style.Triggers>
+                <!--<Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.5" />
+                </Trigger>-->
+                <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                    <Setter Property="TextColor" Value="GreenYellow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </ContentPage.Resources>
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            Command="{Binding MainPageLoadedCommand}"
+            CommandParameter="{x:Reference mainPage}"
+            EventName="Loaded" />
+    </ContentPage.Behaviors>
+
+    <ScrollView>
+        <Grid Rotation="0">
+            <Frame
+                Margin="0,0"
+                Padding="0"
+                CornerRadius="0"
+                HasShadow="False"
+                Loaded="Frame_Loaded"
+                Rotation="0">
+                <!--<Image Aspect="Fill" Source="a3.jpeg" />-->
+                <Image
+                    x:Name="imgCamera"
+                    x:FieldModifier="public"
+                    Aspect="Fill" />
+                <!--<Image Aspect="Fill" Source="{Binding DotNetBotImageByteArray, Mode=TwoWay, Converter={StaticResource ByteArrayToImageSourceConverter}}" />-->
+                <!--<Image x:Name="img" Aspect="Fill" />-->
+            </Frame>
+
+            <VerticalStackLayout
+                Padding="30,0"
+                HorizontalOptions="Center"
+                Spacing="25"
+                VerticalOptions="Center">
+                <VerticalStackLayout.Resources>
+                    <Style TargetType="{x:Type Label}">
+                        <Setter Property="TextColor" Value="White" />
+                    </Style>
+                </VerticalStackLayout.Resources>
+
+                <Label
+                    FontSize="18"
+                    HorizontalOptions="Center"
+                    Text="{Binding DateTime, StringFormat='{0:T}'}"
+                    VerticalOptions="Center" />
+
+                <Entry
+                    x:Name="entry"
+                    Completed="OnEntryCompleted"
+                    Placeholder="Enter text"
+                    TextChanged="OnEntryTextChanged" />
+                <Button Text="Take phone" Clicked="Button_Clicked"></Button>
+                <Button Text="Screen Shot" Clicked="Button2_Clicked"></Button>
+            </VerticalStackLayout>
+
+
+            <Grid
+                BackgroundColor="Green"
+                HorizontalOptions="Start"
+                VerticalOptions="End">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        x:Name="btnW"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        ap:ButtonKeyBoard.Key="{x:Static ap:Key.W}"
+                        Style="{DynamicResource Button.Style}"
+                        Text="W">
+                        <Button.Behaviors>
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnPressedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnW}}"
+                                EventName="Pressed" />
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnReleasedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnW}}"
+                                EventName="Released" />
+                        </Button.Behaviors>
+                    </Button>
+
+                    <Button
+                        x:Name="btnA"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        ap:ButtonKeyBoard.Key="{x:Static ap:Key.A}"
+                        Style="{DynamicResource Button.Style}"
+                        Text="A">
+                        <Button.Behaviors>
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnPressedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnA}}"
+                                EventName="Pressed" />
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnReleasedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnA}}"
+                                EventName="Released" />
+                        </Button.Behaviors>
+                    </Button>
+
+
+                    <Button
+                        x:Name="btnS"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        ap:ButtonKeyBoard.Key="{x:Static ap:Key.S}"
+                        Style="{DynamicResource Button.Style}"
+                        Text="S">
+                        <Button.Behaviors>
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnPressedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnS}}"
+                                EventName="Pressed" />
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnReleasedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnS}}"
+                                EventName="Released" />
+                        </Button.Behaviors>
+                    </Button>
+
+
+                    <Button
+                        x:Name="btnD"
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        ap:ButtonKeyBoard.Key="{x:Static ap:Key.D}"
+                        Style="{DynamicResource Button.Style}"
+                        Text="D">
+                        <Button.Behaviors>
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnPressedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnD}}"
+                                EventName="Pressed" />
+                            <toolkit:EventToCommandBehavior
+                                Command="{Binding BtnReleasedCommand}"
+                                CommandParameter="{Binding Source={x:Reference btnD}}"
+                                EventName="Released" />
+                        </Button.Behaviors>
+                    </Button>
+                </Grid>
+            </Grid>
+
+            <Grid
+                ColumnDefinitions="Auto,Auto,Auto"
+                HorizontalOptions="End"
+                RowDefinitions="Auto,Auto,Auto"
+                VerticalOptions="End">
+                <Grid.Resources>
+                    <Style BasedOn="{StaticResource Button.Style}" TargetType="Button">
+                        <Setter Property="FontSize" Value="25" />
+                        <Setter Property="Padding" Value="5,0,5,5" />
+                        <Setter Property="WidthRequest" Value="40" />
+                        <Setter Property="HeightRequest" Value="38" />
+                        <Setter Property="HorizontalOptions" Value="Center" />
+                        <Setter Property="VerticalOptions" Value="Center" />
+                    </Style>
+                </Grid.Resources>
+                <Button
+                    x:Name="btnUp"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    ap:ButtonKeyBoard.Key="{x:Static ap:Key.Up}"
+                    FontSize="25"
+                    Text="↑">
+                    <Button.Behaviors>
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnPressedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnUp}}"
+                            EventName="Pressed" />
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnReleasedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnUp}}"
+                            EventName="Released" />
+                    </Button.Behaviors>
+                </Button>
+                <Button
+                    x:Name="btnLeft"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    ap:ButtonKeyBoard.Key="{x:Static ap:Key.Left}"
+                    FontSize="25"
+                    Text="←">
+                    <Button.Behaviors>
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnPressedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnLeft}}"
+                            EventName="Pressed" />
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnReleasedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnLeft}}"
+                            EventName="Released" />
+                    </Button.Behaviors>
+                </Button>
+                <Button
+                    x:Name="btnRight"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    ap:ButtonKeyBoard.Key="{x:Static ap:Key.Right}"
+                    FontSize="25"
+                    Text="→">
+                    <Button.Behaviors>
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnPressedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnRight}}"
+                            EventName="Pressed" />
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnReleasedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnRight}}"
+                            EventName="Released" />
+                    </Button.Behaviors>
+                </Button>
+                <Button
+                    x:Name="btnDown"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    ap:ButtonKeyBoard.Key="{x:Static ap:Key.Down}"
+                    FontSize="25"
+                    Text="↓">
+                    <Button.Behaviors>
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnPressedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnDown}}"
+                            EventName="Pressed" />
+                        <toolkit:EventToCommandBehavior
+                            Command="{Binding BtnReleasedCommand}"
+                            CommandParameter="{Binding Source={x:Reference btnDown}}"
+                            EventName="Released" />
+                    </Button.Behaviors>
+                </Button>
+            </Grid>
+
+        </Grid>
+
+        <!--<VerticalStackLayout
+            Spacing="25"
+            Padding="30,0"
+            VerticalOptions="Center">
+
+            <Image
+                Source="dotnet_bot.png"
+                SemanticProperties.Description="Cute dot net bot waving hi to you!"
+                HeightRequest="200"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="Hello, World!"
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="32"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="Welcome to .NET Multi-platform App UI"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Welcome to dot net Multi platform App U I"
+                FontSize="18"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="CounterBtn"
+                Text="Click me"
+                SemanticProperties.Hint="Counts the number of times you click"
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>-->
+    </ScrollView>
+
+</ContentPage>

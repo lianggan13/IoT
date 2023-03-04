@@ -1,0 +1,337 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>5a3c6887-72e7-445f-bf59-17a4e64cbbd7</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>Program.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>Raspberry.Server</Name>
+    <RootNamespace>Raspberry.Server</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Async\async.py" />
+    <Compile Include="Backup\小车系统\BMP180.py" />
+    <Compile Include="Backup\小车系统\car.py" />
+    <Compile Include="Backup\小车系统\HC_SR04.py" />
+    <Compile Include="Backup\小车系统\Senor.py" />
+    <Compile Include="Backup\小车系统\Server_car.py" />
+    <Compile Include="Backup\小车系统\sg90.py" />
+    <Compile Include="Backup\小车系统\SSD1306.py" />
+    <Compile Include="Backup\远端GUI\ClientUbuntu.py" />
+    <Compile Include="Backup\远端GUI\face.py" />
+    <Compile Include="L298N\MotorWheel.py" />
+    <Compile Include="CSI\Camera.py" />
+    <Compile Include="Pioneer600\BMP280\python\BMP280.py" />
+    <Compile Include="Pioneer600\DS18B20\python\ds18b20.py" />
+    <Compile Include="Pioneer600\DS3231\python\ds3231.py" />
+    <Compile Include="Pioneer600\IRM\python\irm.py" />
+    <Compile Include="Pioneer600\KEY\python\Interrupt.py" />
+    <Compile Include="Pioneer600\KEY\python\key.py" />
+    <Compile Include="Pioneer600\LED\python\led.py" />
+    <Compile Include="Pioneer600\LED\python\pwm.py" />
+    <Compile Include="Pioneer600\OLED\python\animate.py" />
+    <Compile Include="Pioneer600\OLED\python\dispchar.py" />
+    <Compile Include="Pioneer600\OLED\python\image.py" />
+    <Compile Include="Pioneer600\OLED\python\oled.py" />
+    <Compile Include="Pioneer600\OLED\python\SSD1306.py" />
+    <Compile Include="Pioneer600\OLED\python\waveshare.py" />
+    <Compile Include="Pioneer600\PCF8574\python\led.py" />
+    <Compile Include="Pioneer600\PCF8574\python\pcf8574.py" />
+    <Compile Include="Pioneer600\PCF8591\ADC\python\pcf8591_ADC.py" />
+    <Compile Include="Pioneer600\PCF8591\DAC\python\pcf8591_DAC.py" />
+    <Compile Include="Pioneer600\UART\RPI2B\python\uart.py" />
+    <Compile Include="Pioneer600\UART\RPI3\python\uart.py" />
+    <Compile Include="Program.py" />
+    <Compile Include="SG90\CameraTerrace.py" />
+    <Compile Include="TCP\client1.py" />
+    <Compile Include="TCP\server1.py" />
+    <Compile Include="TCP\socketcom.py" />
+    <Compile Include="Utils\Event.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Async\" />
+    <Folder Include="Backup\小车系统\" />
+    <Folder Include="Backup\远端GUI\" />
+    <Folder Include="Backup\远端GUI\data\" />
+    <Folder Include="Backup\远端GUI\data\haarcascades\" />
+    <Folder Include="Backup\远端GUI\data\hogcascades\" />
+    <Folder Include="Backup\远端GUI\data\lbpcascades\" />
+    <Folder Include="Backup\远端GUI\data\vec_files\" />
+    <Folder Include="Backup\远端GUI\image\" />
+    <Folder Include="Backup\远端GUI\image\ico\" />
+    <Folder Include="Backup\远端GUI\sound\" />
+    <Folder Include="L298N\" />
+    <Folder Include="CSI\" />
+    <Folder Include="Backup\" />
+    <Folder Include="Pioneer600\" />
+    <Folder Include="Pioneer600\BMP280\" />
+    <Folder Include="Pioneer600\BMP280\bcm2835\" />
+    <Folder Include="Pioneer600\BMP280\python\" />
+    <Folder Include="Pioneer600\BMP280\wiringPi\" />
+    <Folder Include="Pioneer600\DS18B20\" />
+    <Folder Include="Pioneer600\DS18B20\fs\" />
+    <Folder Include="Pioneer600\DS18B20\python\" />
+    <Folder Include="Pioneer600\DS3231\" />
+    <Folder Include="Pioneer600\DS3231\bcm2835\" />
+    <Folder Include="Pioneer600\DS3231\python\" />
+    <Folder Include="Pioneer600\DS3231\wiringPi\" />
+    <Folder Include="Pioneer600\IRM\" />
+    <Folder Include="Pioneer600\IRM\bcm2835\" />
+    <Folder Include="Pioneer600\IRM\python\" />
+    <Folder Include="Pioneer600\IRM\wiringPi\" />
+    <Folder Include="Pioneer600\KEY\" />
+    <Folder Include="Pioneer600\KEY\bcm2835\" />
+    <Folder Include="Pioneer600\KEY\python\" />
+    <Folder Include="Pioneer600\KEY\wiringPi\" />
+    <Folder Include="Pioneer600\LED\" />
+    <Folder Include="Pioneer600\LED\bcm2835\" />
+    <Folder Include="Pioneer600\LED\fs\" />
+    <Folder Include="Pioneer600\LED\python\" />
+    <Folder Include="Pioneer600\LED\shell\" />
+    <Folder Include="Pioneer600\LED\wiringPi\" />
+    <Folder Include="Pioneer600\OLED\" />
+    <Folder Include="Pioneer600\OLED\bcm2835\" />
+    <Folder Include="Pioneer600\OLED\python\" />
+    <Folder Include="Pioneer600\OLED\wiringPi\" />
+    <Folder Include="Pioneer600\PCF8574\" />
+    <Folder Include="Pioneer600\PCF8574\bcm2835\" />
+    <Folder Include="Pioneer600\PCF8574\fs\" />
+    <Folder Include="Pioneer600\PCF8574\python\" />
+    <Folder Include="Pioneer600\PCF8574\wiringPi\" />
+    <Folder Include="Pioneer600\PCF8591\" />
+    <Folder Include="Pioneer600\PCF8591\ADC\" />
+    <Folder Include="Pioneer600\PCF8591\ADC\bcm2835\" />
+    <Folder Include="Pioneer600\PCF8591\ADC\python\" />
+    <Folder Include="Pioneer600\PCF8591\ADC\wiringPi\" />
+    <Folder Include="Pioneer600\PCF8591\DAC\" />
+    <Folder Include="Pioneer600\PCF8591\DAC\bcm2835\" />
+    <Folder Include="Pioneer600\PCF8591\DAC\python\" />
+    <Folder Include="Pioneer600\PCF8591\DAC\wiringPi\" />
+    <Folder Include="Pioneer600\Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Color_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Flame_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Hall_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Infrared_Reflective_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Laser_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Liquid_Level_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Metal_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Moisture_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\MQ-5_Gas_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Rotation_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Sound_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Temperature-Humidity_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\Tilt_Sensor\" />
+    <Folder Include="Pioneer600\Sensor\UV_Sensor\" />
+    <Folder Include="Pioneer600\UART\" />
+    <Folder Include="Pioneer600\UART\RPI2B\" />
+    <Folder Include="Pioneer600\UART\RPI2B\python\" />
+    <Folder Include="Pioneer600\UART\RPI2B\wiringPi\" />
+    <Folder Include="Pioneer600\UART\RPI3\" />
+    <Folder Include="Pioneer600\UART\RPI3\python\" />
+    <Folder Include="Pioneer600\UART\RPI3\wiringPi\" />
+    <Folder Include="Utils\" />
+    <Folder Include="SG90\" />
+    <Folder Include="TCP\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Backup\小车系统\mjpg.sh" />
+    <Content Include="Backup\小车系统\swpu.png" />
+    <Content Include="Backup\毕业论文_查重报告.pdf" />
+    <Content Include="Backup\远端GUI\.ClientUbuntu.py.swo" />
+    <Content Include="Backup\远端GUI\.ClientUbuntu.py.swp" />
+    <Content Include="Backup\远端GUI\.face.py.swp" />
+    <Content Include="Backup\远端GUI\data\CMakeLists.txt" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_eye.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_eye_tree_eyeglasses.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_frontalface_alt.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_frontalface_alt2.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_frontalface_alt_tree.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_frontalface_default.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_fullbody.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_lefteye_2splits.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_lowerbody.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_eyepair_big.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_eyepair_small.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_leftear.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_lefteye.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_mouth.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_nose.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_rightear.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_righteye.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_mcs_upperbody.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_profileface.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_righteye_2splits.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_smile.xml" />
+    <Content Include="Backup\远端GUI\data\haarcascades\haarcascade_upperbody.xml" />
+    <Content Include="Backup\远端GUI\data\hogcascades\hogcascade_pedestrians.xml" />
+    <Content Include="Backup\远端GUI\data\lbpcascades\iphone.xml" />
+    <Content Include="Backup\远端GUI\data\lbpcascades\lbpcascade_frontalface.xml" />
+    <Content Include="Backup\远端GUI\data\lbpcascades\lbpcascade_profileface.xml" />
+    <Content Include="Backup\远端GUI\data\lbpcascades\lbpcascade_silverware.xml" />
+    <Content Include="Backup\远端GUI\data\readme.txt" />
+    <Content Include="Backup\远端GUI\data\vec_files\trainingfaces_24-24.vec" />
+    <Content Include="Backup\远端GUI\image\ico\0.ico" />
+    <Content Include="Backup\远端GUI\image\ico\1.ico" />
+    <Content Include="Backup\远端GUI\image\ico\10.ico" />
+    <Content Include="Backup\远端GUI\image\ico\11.ico" />
+    <Content Include="Backup\远端GUI\image\ico\12.ico" />
+    <Content Include="Backup\远端GUI\image\ico\13.ico" />
+    <Content Include="Backup\远端GUI\image\ico\2.ico" />
+    <Content Include="Backup\远端GUI\image\ico\2_1.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\3.ico" />
+    <Content Include="Backup\远端GUI\image\ico\4.ico" />
+    <Content Include="Backup\远端GUI\image\ico\5.ico" />
+    <Content Include="Backup\远端GUI\image\ico\5_1.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\6.ico" />
+    <Content Include="Backup\远端GUI\image\ico\7.ico" />
+    <Content Include="Backup\远端GUI\image\ico\7_1.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\8.ico" />
+    <Content Include="Backup\远端GUI\image\ico\9.ico" />
+    <Content Include="Backup\远端GUI\image\ico\flame.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\fog.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\noflame.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\nofog.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\nosafe.jpg" />
+    <Content Include="Backup\远端GUI\image\ico\safe.jpg" />
+    <Content Include="Backup\远端GUI\image\imgCSI.jpg" />
+    <Content Include="Backup\远端GUI\image\imgCSI_detect.jpg" />
+    <Content Include="Backup\远端GUI\image\imgCSI_nodetect.jpg" />
+    <Content Include="Backup\远端GUI\image\imgSocket.jpeg" />
+    <Content Include="Backup\远端GUI\image\imgUSB.jpeg" />
+    <Content Include="Backup\远端GUI\image\imgUSB2.jpeg" />
+    <Content Include="Backup\远端GUI\image\PiCamera.jpg" />
+    <Content Include="Backup\远端GUI\image\swpu.jpg" />
+    <Content Include="Backup\远端GUI\sound\beez.mp3" />
+    <Content Include="Pioneer600\BMP280\bcm2835\bmp280.c" />
+    <Content Include="Pioneer600\BMP280\bcm2835\bmp280.h" />
+    <Content Include="Pioneer600\BMP280\bcm2835\Makefile" />
+    <Content Include="Pioneer600\BMP280\wiringPi\bmp280.c" />
+    <Content Include="Pioneer600\BMP280\wiringPi\bmp280.h" />
+    <Content Include="Pioneer600\BMP280\wiringPi\Makefile" />
+    <Content Include="Pioneer600\DS18B20\fs\ds18b20.c" />
+    <Content Include="Pioneer600\DS18B20\fs\Makefile" />
+    <Content Include="Pioneer600\DS18B20\python\.ds18b20.py.swp" />
+    <Content Include="Pioneer600\DS3231\bcm2835\ds3231.c" />
+    <Content Include="Pioneer600\DS3231\bcm2835\Makefile" />
+    <Content Include="Pioneer600\DS3231\wiringPi\ds3231.c" />
+    <Content Include="Pioneer600\DS3231\wiringPi\Makefile" />
+    <Content Include="Pioneer600\IRM\bcm2835\irm.c" />
+    <Content Include="Pioneer600\IRM\bcm2835\Makefile" />
+    <Content Include="Pioneer600\IRM\wiringPi\irm.c" />
+    <Content Include="Pioneer600\IRM\wiringPi\Makefile" />
+    <Content Include="Pioneer600\KEY\bcm2835\event.c" />
+    <Content Include="Pioneer600\KEY\bcm2835\key.c" />
+    <Content Include="Pioneer600\KEY\bcm2835\Makefile" />
+    <Content Include="Pioneer600\KEY\wiringPi\Interrupt.c" />
+    <Content Include="Pioneer600\KEY\wiringPi\key.c" />
+    <Content Include="Pioneer600\KEY\wiringPi\Makefile" />
+    <Content Include="Pioneer600\LED\bcm2835\led.c" />
+    <Content Include="Pioneer600\LED\bcm2835\Makefile" />
+    <Content Include="Pioneer600\LED\fs\led.c" />
+    <Content Include="Pioneer600\LED\fs\Makefile" />
+    <Content Include="Pioneer600\LED\shell\LED.sh" />
+    <Content Include="Pioneer600\LED\wiringPi\led.c" />
+    <Content Include="Pioneer600\LED\wiringPi\Makefile" />
+    <Content Include="Pioneer600\LED\wiringPi\pwm.c" />
+    <Content Include="Pioneer600\OLED\bcm2835\Makefile" />
+    <Content Include="Pioneer600\OLED\bcm2835\oled.c" />
+    <Content Include="Pioneer600\OLED\bcm2835\SSD1306.c" />
+    <Content Include="Pioneer600\OLED\bcm2835\SSD1306.h" />
+    <Content Include="Pioneer600\OLED\python\happycat.ppm" />
+    <Content Include="Pioneer600\OLED\python\waveshare.bmp" />
+    <Content Include="Pioneer600\OLED\wiringPi\Makefile" />
+    <Content Include="Pioneer600\OLED\wiringPi\oled.c" />
+    <Content Include="Pioneer600\OLED\wiringPi\SSD1306.c" />
+    <Content Include="Pioneer600\OLED\wiringPi\SSD1306.h" />
+    <Content Include="Pioneer600\PCF8574\bcm2835\led.c" />
+    <Content Include="Pioneer600\PCF8574\bcm2835\Makefile" />
+    <Content Include="Pioneer600\PCF8574\bcm2835\pcf8574.c" />
+    <Content Include="Pioneer600\PCF8574\fs\led.c" />
+    <Content Include="Pioneer600\PCF8574\fs\Makefile" />
+    <Content Include="Pioneer600\PCF8574\wiringPi\led.c" />
+    <Content Include="Pioneer600\PCF8574\wiringPi\Makefile" />
+    <Content Include="Pioneer600\PCF8574\wiringPi\PCF8574.c" />
+    <Content Include="Pioneer600\PCF8591\ADC\bcm2835\Makefile" />
+    <Content Include="Pioneer600\PCF8591\ADC\bcm2835\pcf8591.c" />
+    <Content Include="Pioneer600\PCF8591\ADC\wiringPi\Makefile" />
+    <Content Include="Pioneer600\PCF8591\ADC\wiringPi\pcf8591.c" />
+    <Content Include="Pioneer600\PCF8591\DAC\bcm2835\Makefile" />
+    <Content Include="Pioneer600\PCF8591\DAC\bcm2835\pcf8591.c" />
+    <Content Include="Pioneer600\PCF8591\DAC\wiringPi\Makefile" />
+    <Content Include="Pioneer600\PCF8591\DAC\wiringPi\pcf8591.c" />
+    <Content Include="Pioneer600\Pioneer600-Schematic.pdf" />
+    <Content Include="Pioneer600\Sensor\Color_Sensor\Color_Sensor" />
+    <Content Include="Pioneer600\Sensor\Color_Sensor\Color_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Color_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Flame_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Flame_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Flame_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Hall_Sensor\.General_Sensor.c.swp" />
+    <Content Include="Pioneer600\Sensor\Hall_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Hall_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Hall_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Infrared_Reflective_Sensor\.General_Sensor.c.swp" />
+    <Content Include="Pioneer600\Sensor\Infrared_Reflective_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Infrared_Reflective_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Infrared_Reflective_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Laser_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Laser_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Laser_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Liquid_Level_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Liquid_Level_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Liquid_Level_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Metal_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Metal_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Metal_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Moisture_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Moisture_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Moisture_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\MQ-5_Gas_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\MQ-5_Gas_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\MQ-5_Gas_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Rotation_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Rotation_Sensor\Rotation_Sensor" />
+    <Content Include="Pioneer600\Sensor\Rotation_Sensor\Rotation_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Sound_Sensor\.General_Sensor.c.swo" />
+    <Content Include="Pioneer600\Sensor\Sound_Sensor\.General_Sensor.c.swp" />
+    <Content Include="Pioneer600\Sensor\Sound_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Sound_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Sound_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Temperature-Humidity_Sensor\DHT11" />
+    <Content Include="Pioneer600\Sensor\Temperature-Humidity_Sensor\DHT11.c" />
+    <Content Include="Pioneer600\Sensor\Temperature-Humidity_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\Tilt_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\Tilt_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\Tilt_Sensor\Makefile" />
+    <Content Include="Pioneer600\Sensor\UV_Sensor\General_Sensor" />
+    <Content Include="Pioneer600\Sensor\UV_Sensor\General_Sensor.c" />
+    <Content Include="Pioneer600\Sensor\UV_Sensor\Makefile" />
+    <Content Include="Pioneer600\UART\RPI2B\wiringPi\Makefile" />
+    <Content Include="Pioneer600\UART\RPI2B\wiringPi\UART" />
+    <Content Include="Pioneer600\UART\RPI2B\wiringPi\UART.c" />
+    <Content Include="Pioneer600\UART\RPI3\wiringPi\Makefile" />
+    <Content Include="Pioneer600\UART\RPI3\wiringPi\UART.c" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

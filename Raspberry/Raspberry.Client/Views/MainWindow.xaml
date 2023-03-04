@@ -1,0 +1,291 @@
+﻿<Window
+    x:Class="Raspberry.Client.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Interaction="http://schemas.microsoft.com/expression/2010/interactions"
+    xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:ap="clr-namespace:Raspberry.Client.AttachedProperties"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:input="clr-namespace:System.Windows.Input;assembly=WindowsBase"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="clr-namespace:Raspberry.Client.ViewModels"
+    Title="{Binding Title}"
+    Width="800"
+    Height="450"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="Button.Style" TargetType="{x:Type Button}">
+            <!--<Setter Property="Opacity" Value="0"></Setter>-->
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="23" />
+            <Setter Property="Width" Value="68" />
+            <Setter Property="Height" Value="35" />
+            <Setter Property="Foreground" Value="#FFF4F4F4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FocusVisualStyle">
+                <Setter.Value>
+                    <Style TargetType="{x:Type Control}">
+                        <!--<Setter Property="Foreground" Value="GreenYellow" />-->
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Rectangle
+                                        Margin="2"
+                                        Stroke="#FFADB2B5"
+                                        StrokeDashArray="1,1"
+                                        StrokeThickness="1" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ButtonBase}">
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <!--<Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.5" />
+                </Trigger>-->
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="Foreground" Value="GreenYellow" />
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+    <Window.DataContext>
+        <vm:MainViewModel x:Name="vm" />
+    </Window.DataContext>
+    <Interactivity:Interaction.Triggers>
+        <Interactivity:EventTrigger EventName="Loaded">
+            <Interaction:CallMethodAction MethodName="Window_Loaded" TargetObject="{Binding .}" />
+        </Interactivity:EventTrigger>
+    </Interactivity:Interaction.Triggers>
+    <Window.InputBindings>
+        <KeyBinding
+            Key="W"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnW}" />
+        <KeyBinding
+            Key="A"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnA}" />
+        <KeyBinding
+            Key="S"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnS}" />
+        <KeyBinding
+            Key="D"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnD}" />
+        <KeyBinding
+            Key="Up"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnUp}" />
+        <KeyBinding
+            Key="Left"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnLeft}" />
+        <KeyBinding
+            Key="Down"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnDown}" />
+        <KeyBinding
+            Key="Right"
+            Command="{Binding PressKeyCommand}"
+            CommandParameter="{Binding ElementName=btnRight}" />
+    </Window.InputBindings>
+
+    <Grid>
+        <Grid.Resources>
+            <Style TargetType="{x:Type Button}">
+                <!--<Setter Property="Opacity" Value="0"></Setter>-->
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="FontSize" Value="23" />
+                <Setter Property="Width" Value="68" />
+                <Setter Property="Height" Value="35" />
+                <Style.Triggers>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.5" />
+                    </Trigger>
+
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+        <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
+        <Button
+            x:Name="imgHost"
+            FocusVisualStyle="{x:Null}"
+            Style="{x:Null}">
+            <Image
+                x:Name="csiImg"
+                d:Source="/Assets/Images/a3.jpeg"
+                Source="{Binding Img}"
+                Stretch="Fill" />
+        </Button>
+
+
+
+        <Grid>
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    x:Name="btnW"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.W}"
+                    Content="W"
+                    Style="{DynamicResource Button.Style}">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+                <Button
+                    x:Name="btnA"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.A}"
+                    Content="A"
+                    Style="{DynamicResource Button.Style}">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+                <Button
+                    x:Name="btnS"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.S}"
+                    Content="S"
+                    Style="{DynamicResource Button.Style}">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+                <Button
+                    x:Name="btnD"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.D}"
+                    Content="D"
+                    Style="{DynamicResource Button.Style}">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+            </Grid>
+
+            <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.Resources>
+                    <Style BasedOn="{StaticResource Button.Style}" TargetType="{x:Type Button}">
+                        <Setter Property="Height" Value="35" />
+                        <Setter Property="Width" Value="35" />
+                    </Style>
+                </Grid.Resources>
+                <Button
+                    x:Name="btnUp"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.Up}"
+                    Content="↑">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+                <Button
+                    x:Name="btnLeft"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.Left}"
+                    Content="←">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+                <Button
+                    x:Name="btnDown"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.Down}"
+                    Content="↓">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+                <Button
+                    x:Name="btnRight"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    ap:ButtonKeyBoard.Key="{x:Static input:Key.Right}"
+                    Content="→">
+                    <Interactivity:Interaction.Triggers>
+                        <Interactivity:EventTrigger EventName="KeyUp">
+                            <Interaction:CallMethodAction MethodName="Btn_KeyUp" TargetObject="{Binding .}" />
+                        </Interactivity:EventTrigger>
+                    </Interactivity:Interaction.Triggers>
+                </Button>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</Window>

@@ -1,0 +1,111 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>f457c473-52bd-4e6e-a43b-99b6dffba1f4</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>TPYBoard_lib.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>TPYBoard_lib</Name>
+    <RootNamespace>TPYBoard_lib</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="00.MFRC522 --- 射频卡\main.py" />
+    <Compile Include="00.MFRC522 --- 射频卡\mfrc522.py" />
+    <Compile Include="01.LCD1602 --- LCD1602液晶屏\LCD1602.py" />
+    <Compile Include="01.LCD1602 --- LCD1602液晶屏\main.py" />
+    <Compile Include="01.LCD1602 --- LCD1602液晶屏\tpyb_lcd1602.py" />
+    <Compile Include="02.LCD5110 --- LCD5110液晶屏\font_5110.py" />
+    <Compile Include="02.LCD5110 --- LCD5110液晶屏\lcd5110.py" />
+    <Compile Include="02.LCD5110 --- LCD5110液晶屏\main.py" />
+    <Compile Include="03.LCD12864 --- LCD12864液晶屏\lcd12864_lib.py" />
+    <Compile Include="03.LCD12864 --- LCD12864液晶屏\main.py" />
+    <Compile Include="04.TFTLCD --- TFT液晶屏\font1.py" />
+    <Compile Include="04.TFTLCD --- TFT液晶屏\main.py" />
+    <Compile Include="04.TFTLCD --- TFT液晶屏\tftlcd.py" />
+    <Compile Include="05.DS18X20 --- DS18X20温度传感器\ds18b20.py" />
+    <Compile Include="05.DS18X20 --- DS18X20温度传感器\main.py" />
+    <Compile Include="05.DS18X20 --- DS18X20温度传感器\onewire_lib.py" />
+    <Compile Include="06.AM2320 --- 高精度温湿度传感器\am2320.py" />
+    <Compile Include="06.AM2320 --- 高精度温湿度传感器\main.py" />
+    <Compile Include="07.GY-30 --- 光照强度传感器\gy30.py" />
+    <Compile Include="07.GY-30 --- 光照强度传感器\main.py" />
+    <Compile Include="08.GY39 --- 气象监测模块\gy39.py" />
+    <Compile Include="08.GY39 --- 气象监测模块\gy39_i2c.py" />
+    <Compile Include="08.GY39 --- 气象监测模块\main.py" />
+    <Compile Include="09.GY68_BMP180 -- 大气压传感器\bmp180.py" />
+    <Compile Include="09.GY68_BMP180 -- 大气压传感器\main.py" />
+    <Compile Include="10.DS3231 --- 时钟模块\ds3231.py" />
+    <Compile Include="10.DS3231 --- 时钟模块\main.py" />
+    <Compile Include="11.VS1838B --- 红外接收模块\bm.py" />
+    <Compile Include="11.VS1838B --- 红外接收模块\main.py" />
+    <Compile Include="11.VS1838B --- 红外接收模块\necir.py" />
+    <Compile Include="12.NRF24L01 --- 2.4G无线收发模块\main.py" />
+    <Compile Include="12.NRF24L01 --- 2.4G无线收发模块\nrf24l01.py" />
+    <Compile Include="12.NRF24L01 --- 2.4G无线收发模块\nrf24l01use.py" />
+    <Compile Include="13.NRF905 --- 2.4G无线收发模块\main.py" />
+    <Compile Include="13.NRF905 --- 2.4G无线收发模块\nrf905.py" />
+    <Compile Include="14.SYN6288 --- SYN6288语音合成模块\main.py" />
+    <Compile Include="14.SYN6288 --- SYN6288语音合成模块\syn6288.py" />
+    <Compile Include="15.AT24C0X --- AT24C0X存储器\at24c0x.py" />
+    <Compile Include="15.AT24C0X --- AT24C0X存储器\main.py" />
+    <Compile Include="16.NixieTube --- 数码管\digital.py" />
+    <Compile Include="16.NixieTube --- 数码管\main.py" />
+    <Compile Include="17.SteperMotor --- 四相步进电机\main.py" />
+    <Compile Include="17.SteperMotor --- 四相步进电机\stepermotor.py" />
+    <Compile Include="18.PS2 --- PS2无线手柄\main.py" />
+    <Compile Include="18.PS2 --- PS2无线手柄\ps2.py" />
+    <Compile Include="19.AS608 --- AS608指纹识别\as608.py" />
+    <Compile Include="19.AS608 --- AS608指纹识别\main.py" />
+    <Compile Include="TPYBoard_lib.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="00.MFRC522 --- 射频卡\" />
+    <Folder Include="01.LCD1602 --- LCD1602液晶屏\" />
+    <Folder Include="02.LCD5110 --- LCD5110液晶屏\" />
+    <Folder Include="03.LCD12864 --- LCD12864液晶屏\" />
+    <Folder Include="04.TFTLCD --- TFT液晶屏\" />
+    <Folder Include="05.DS18X20 --- DS18X20温度传感器\" />
+    <Folder Include="06.AM2320 --- 高精度温湿度传感器\" />
+    <Folder Include="07.GY-30 --- 光照强度传感器\" />
+    <Folder Include="08.GY39 --- 气象监测模块\" />
+    <Folder Include="09.GY68_BMP180 -- 大气压传感器\" />
+    <Folder Include="10.DS3231 --- 时钟模块\" />
+    <Folder Include="11.VS1838B --- 红外接收模块\" />
+    <Folder Include="12.NRF24L01 --- 2.4G无线收发模块\" />
+    <Folder Include="13.NRF905 --- 2.4G无线收发模块\" />
+    <Folder Include="14.SYN6288 --- SYN6288语音合成模块\" />
+    <Folder Include="15.AT24C0X --- AT24C0X存储器\" />
+    <Folder Include="16.NixieTube --- 数码管\" />
+    <Folder Include="17.SteperMotor --- 四相步进电机\" />
+    <Folder Include="18.PS2 --- PS2无线手柄\" />
+    <Folder Include="19.AS608 --- AS608指纹识别\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="04.TFTLCD --- TFT液晶屏\44.bmp" />
+    <Content Include="04.TFTLCD --- TFT液晶屏\55.bmp" />
+    <Content Include="08.GY39 --- 气象监测模块\GY39_V1.exe" />
+    <Content Include="19.AS608 --- AS608指纹识别\指纹指令.txt" />
+    <Content Include="README.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
