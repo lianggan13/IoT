@@ -29,10 +29,29 @@ class Camera:
         with picamera.PiCamera() as camera:
                 camera.vflip = True
                 camera.hflip = True
-                camera.resolution = (640,480)
-                camera.quality  = 10        # ��Ƶ��������(ȡֵ��ΧΪ 0-40��ֵԽС����������Խ��)
-                camera.bitrate  = 1000000   # ��Ƶ������ bps(������Խ�ͣ���������Խ��)
-                camera.framerate = 25       # ��Ƶ֡��(֡/s)
+                #camera.resolution = (640,480)  # VGA 分辨率 
+                camera.resolution = (320, 240) # QVGA 分辨率
+                camera.framerate = 25       # ��Ƶ֡��(֡/s)
+                camera.image_effect = 'denoise' # 降噪 
+                # camera.annotate_background = picamera.Color('black') # 黑色背景 
+                #camera.annotate_text_size = 20 # 小号字体
+                #camera.iso = 100 # 设置 ISO 感光度:较低的ISO可以降低画质但影响不大
+                
+                camera.exposure_mode = 'sports'  # 关闭自动曝光 # 'auto' # 自动曝光  'sports' # 运动模式曝光,更快速的自动曝光 
+                #camera.awb_mode = 'off' # 禁用自动白平衡来加快摄像头初始化
+                #camera.format = 'rgb'   # RGB格式比JPEG质量差但计算更简单
+
+                # xxxx...
+                # camera.focus_mode = 'fixed'
+                # camera.focus_autothreshold  = 'fixed' # 固定对焦
+                #camera.quality  = 10        # ��Ƶ��������(ȡֵ��ΧΪ 0-40��ֵԽС����������Խ��)
+                #camera.bitrate  = 1000000   # ��Ƶ������ bps(������Խ�ͣ���������Խ��)
+                #camera.still_stats.bitrate = 1000000 # 设置图像捕获的比特率,单位是比特/秒  
+                #camera.video_stats.bitrate = 2000000 # 设置视频录制的比特率
+                #camera.image_stabilization = False # 关闭图像稳定可以提高性能,但画面会抖动
+                #camera.jpeg_quality = 50 # 降低JPG图像的质量压缩参数,范围是1-100,默认是85
+                #camera.use_gpu = True   # 启用GPU来进行图像预处理,可能会提高性能
+                
                 #camera.start_preview()
                 time.sleep(2)
                 try:
@@ -41,15 +60,15 @@ class Camera:
                         # Truncate the stream to the current position (in case
                         # prior iterations output a longer image)
                         
-                        # ��ȡ��ǰ֡������
+                        # ��ȡ��ǰ֡������
                         frame_data = stream.getvalue()
 
-                        # ��ȡ��ǰ֡�ĳ���
+                        # ��ȡ��ǰ֡�ĳ���
                         frame_length = len(frame_data)
 
-                        # ����ǰֱ֡��תΪ�ֽ�����
+                        # ����ǰֱ֡��תΪ�ֽ�����
                         length_data =  frame_length.to_bytes(4, byteorder='big')
-                        # ����ǰ֡�ĳ��ȴ��Ϊ4�ֽڵ��޷�������
+                        # ����ǰ֡�ĳ��ȴ��Ϊ4�ֽڵ��޷�������
                         #length_data = struct.pack('!I', frame_length)
                         
                         if(self.capured_event != None):
@@ -66,7 +85,7 @@ class Camera:
                         image.save('a1.jpeg',format('JPEG'))
                         '''
 
-                        # ������Խ�����һ֡����
+                        # ������Խ�����һ֡����
                         stream.seek(0)
                         stream.truncate()
                 except Exception as ex:
