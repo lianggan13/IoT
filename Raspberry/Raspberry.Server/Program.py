@@ -17,8 +17,7 @@ import asyncio
 
 P_BUTTON = 20 # key button pin
 api_btn_state = "/api/btn/state"
-# server = TcpServer("192.168.0.9",32769)
-server = TcpServer("192.168.4.1",32769)
+server = TcpServer("192.168.1.1",32769)
 wheel = MotorWheel()
 terrace = CameraTerrace()
 camera = Camera()
