@@ -135,6 +135,7 @@ namespace Raspberry.Client.Services
 
         private void ReceiverAsync()
         {
+            const int BufferSize = 2048 * 512;
             while (socket != null && socket.Connected)
             {
                 try

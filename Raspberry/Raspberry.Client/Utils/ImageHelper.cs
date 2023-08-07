@@ -80,15 +80,46 @@ namespace Raspberry.Client.Utils
             return data;
         }
 
-        public static BitmapImage ConvertByteArrayToBitmapImage(byte[] bytes)
+        /// <summary>
+        /// 在WPF中，当使用Image控件加载并显示图片时，有时候图片文件会被锁定，导致无法完全释放资源。这是因为在显示图片时，WPF的BitmapImage会直接获取文件流并锁定它。为了避免这个问题，你可以使用以下方法来加载图片并完全释放资源
+        /// 1.使用BitmapImage的CacheOption属性设置为BitmapCacheOption.OnLoad，这将会在加载图片时将其缓存在内存中，从而解除对文件的锁定。
+        /// 2.使用MemoryStream来手动缓存图片，以释放文件资源。
+        /// </summary>
+        public static BitmapImage Bytes2BitmapImage(byte[] bytes)
         {
-            var stream = new MemoryStream(bytes);
-            stream.Seek(0, SeekOrigin.Begin);
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.StreamSource = stream;
-            image.EndInit();
-            return image;
+            //BitmapImage bmp = new BitmapImage();
+            //using (MemoryStream stream = new MemoryStream(bytes))
+            //{
+            //    bmp.BeginInit();
+            //    bmp.CacheOption = BitmapCacheOption.OnLoad; // 加载图片
+            //    bmp.CreateOptions = BitmapCreateOptions.DelayCreation; // 延迟后使用
+            //    bmp.StreamSource = stream;
+            //    bmp.EndInit();
+            //    bmp.Freeze();
+            //}
+
+            //bmp.BeginInit();
+            //bmp.CacheOption = BitmapCacheOption.OnLoad; // 将会在加载图片时将其缓存在内存中，从而解除对文件的锁定
+            ////bmp.CreateOptions = BitmapCreateOptions.DelayCreation; // 延迟后使用
+            //bmp.StreamSource = new MemoryStream(bytes);
+            //bmp.EndInit();
+            //bmp.Freeze();
+
+            // 创建一个MemoryStream，用于缓存图像数据
+            var memoryStream = new MemoryStream(bytes);
+
+            // 创建一个BitmapImage并设置CacheOption为OnLoad，以便立即解锁文件
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.StreamSource = memoryStream;
+            bitmapImage.EndInit();
+
+            // 必要时，手动清除MemoryStream资源
+            memoryStream.Close();
+            memoryStream.Dispose();
+
+            return bitmapImage;
         }
 
         private ImageSource ToBitmapSourceA(Bitmap bitmap)

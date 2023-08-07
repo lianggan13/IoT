@@ -97,7 +97,7 @@ namespace Raspberry.Client.ViewModels
 
                 Application.Current?.Dispatcher.Invoke(() =>
                 {
-                    Img = ImageHelper.ConvertByteArrayToBitmapImage(data);
+                    Img = ImageHelper.Bytes2BitmapImage(data);
                     //Img = ImageHelper.BitmapToBitmapImage(new System.Drawing.Bitmap(t_img));
                 });
 
