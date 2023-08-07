@@ -34,11 +34,11 @@ namespace Raspberry.Client.Services
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            //socket = (Socket)result.AsyncState;
             socket.EndConnect(ar);
 
+
             Task.Factory.StartNew(() =>
-                Receiver(),
+                Receiver(), //ReceiverAsync(),
                 TaskCreationOptions.LongRunning);
         }
 
@@ -69,9 +69,71 @@ namespace Raspberry.Client.Services
             byte[] buffer = Encoding.UTF8.GetBytes($"{data}");
             socket.Send(buffer);
         }
-        const int BufferSize = 1024 * 1024 * 512;
 
         private void Receiver()
+        {
+            while (socket != null && socket.Connected)
+            {
+                int bytesRead = 0;
+                byte[] lengthBuf = new byte[4];
+
+                try
+                {
+                    // 接收当前帧的长度
+                    while (lengthBuf.Length < 4)
+                    {
+                        bytesRead += socket.Receive(lengthBuf, bytesRead, lengthBuf.Length - bytesRead, SocketFlags.None);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (lengthBuf.Length < 0)
+                    {
+                        break;
+                    }
+
+                    // 解析当前帧的长度
+                    int frame_length = 0;
+                    if (lengthBuf.Length == 4)
+                    {
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(lengthBuf);
+
+                        frame_length = BitConverter.ToInt32(lengthBuf, 0);
+                        Debug.WriteLine($"Frame Length: {frame_length}");
+                    }
+
+                    // 接收当前帧的数据
+                    bytesRead = 0;
+                    byte[] frameBuf = new byte[frame_length];
+                    while (frameBuf.Length < frame_length)
+                    {
+                        //int bytesRead = socket.Receive(readBuffer);
+                        bytesRead += socket.Receive(frameBuf, bytesRead, frameBuf.Length - bytesRead, SocketFlags.None);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    // 解析当前帧的数据
+                    if (frameBuf.Length == frame_length)
+                    {
+                        Debug.WriteLine($"Frame Data: {frameBuf.Length}");
+                        Received?.Invoke(this, frameBuf);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Disconnect();
+                    Debug.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        private void ReceiverAsync()
         {
             while (socket != null && socket.Connected)
             {
@@ -84,7 +146,6 @@ namespace Raspberry.Client.Services
 
                         byte[] buffer = new byte[BufferSize];
                         socket.BeginReceive(buffer, 0, BufferSize, SocketFlags.None, ReceiveAsyncCallback, buffer);
-
                     }
                     else
                     {
