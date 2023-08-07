@@ -80,7 +80,7 @@ namespace Raspberry.Client.Services
                 try
                 {
                     // 接收当前帧的长度
-                    while (lengthBuf.Length < 4)
+                    while (bytesRead < 4)
                     {
                         bytesRead += socket.Receive(lengthBuf, bytesRead, lengthBuf.Length - bytesRead, SocketFlags.None);
                         if (bytesRead == 0)
@@ -89,7 +89,7 @@ namespace Raspberry.Client.Services
                         }
                     }
 
-                    if (lengthBuf.Length < 0)
+                    if (bytesRead < 0)
                     {
                         break;
                     }
@@ -108,7 +108,7 @@ namespace Raspberry.Client.Services
                     // 接收当前帧的数据
                     bytesRead = 0;
                     byte[] frameBuf = new byte[frame_length];
-                    while (frameBuf.Length < frame_length)
+                    while (bytesRead < frame_length)
                     {
                         //int bytesRead = socket.Receive(readBuffer);
                         bytesRead += socket.Receive(frameBuf, bytesRead, frameBuf.Length - bytesRead, SocketFlags.None);
