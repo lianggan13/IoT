@@ -6,6 +6,7 @@ import sys,time,_thread
 import datetime
 import socket
 import asyncio
+import struct
 import picamera
 import io
 from PIL import Image
@@ -28,29 +29,33 @@ class Camera:
         with picamera.PiCamera() as camera:
                 camera.vflip = True
                 camera.hflip = True
-                # camera.resolution = (300,200)
                 camera.resolution = (640,480)
-                # camera.resolution = (1920,1080)
-                camera.framerate = 30
+                camera.quality  = 10        # 视频编码质量(取值范围为 0-40，值越小，画面质量越低)
+                camera.bitrate  = 1000000   # 视频比特率 bps(比特率越低，画面质量越低)
+                camera.framerate = 25       # 视频帧率(帧/s)
                 #camera.start_preview()
                 time.sleep(2)
-                while True:
+                try:
                     stream = io.BytesIO()
-                    for foo in camera.capture_continuous(stream,format='jpeg',use_video_port=True):
+                    for _ in camera.capture_continuous(stream,format='jpeg',use_video_port=True):
                         # Truncate the stream to the current position (in case
                         # prior iterations output a longer image)
-                        stream.seek(0)
-                        data = stream.read()
                         
-                        # end =  bytes("\0", encoding = "utf-8")
-                        # if(self.capured_event != None):
-                        #     self.capured_event(self,data + end)
+                        # 获取当前帧的数据
+                        frame_data = stream.getvalue()
 
-                        # data = bytes("1", encoding = "utf-8")
-                        # head = (4 + len(data)).to_bytes(4, 'big') 
+                        # 获取当前帧的长度
+                        frame_length = len(frame_data)
 
+                        # 将当前帧直接转为字节数组
+                        length_data =  frame_length.to_bytes(4, byteorder='big')
+                        # 将当前帧的长度打包为4字节的无符号整数
+                        #length_data = struct.pack('!I', frame_length)
+                        
                         if(self.capured_event != None):
-                            self.capured_event(self, data)    
+                            self.capured_event(self, length_data)
+                            self.capured_event(self, frame_data)
+
                         '''
                         n = stream.tell()
                         n = len(data)
@@ -60,12 +65,15 @@ class Camera:
                         image = Image.open(image_stream) # open --> verify --> open --> save
                         image.save('a1.jpeg',format('JPEG'))
                         '''
+
+                        # 清空流以进行下一帧捕获
                         stream.seek(0)
                         stream.truncate()
-                        
-                        # time.sleep(0.1)
-          
-      
+                except Exception as ex:
+                    print("%s" % ex)
+                finally:
+                    camera.close()
+
 if __name__ == "__main__":
     camera =  Camera()
     camera.start()

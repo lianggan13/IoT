@@ -5,6 +5,7 @@
     xmlns:Interaction="http://schemas.microsoft.com/expression/2010/interactions"
     xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
     xmlns:ap="clr-namespace:Raspberry.Client.AttachedProperties"
+    xmlns:converters="clr-namespace:Raspberry.Client.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:input="clr-namespace:System.Windows.Input;assembly=WindowsBase"
@@ -12,11 +13,13 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:Raspberry.Client.ViewModels"
     Title="{Binding Title}"
-    Width="800"
-    Height="450"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    prism:ViewModelLocator.AutoWireViewModel="False"
+    Width="1546"
+    Height="869"
+    d:DesignHeight="869"
+    d:DesignWidth="1546"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    Background="#121212"
+    Foreground="{StaticResource Control.Foreground}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Window.Resources>
@@ -26,7 +29,7 @@
             <Setter Property="FontSize" Value="23" />
             <Setter Property="Width" Value="68" />
             <Setter Property="Height" Value="35" />
-            <Setter Property="Foreground" Value="#FFF4F4F4" />
+            <Setter Property="Foreground" Value="{StaticResource Control.Foreground}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FocusVisualStyle">
@@ -79,15 +82,13 @@
             </Style.Triggers>
         </Style>
 
+
+
     </Window.Resources>
-    <Window.DataContext>
-        <vm:MainViewModel x:Name="vm" />
-    </Window.DataContext>
-    <Interactivity:Interaction.Triggers>
-        <Interactivity:EventTrigger EventName="Loaded">
-            <Interaction:CallMethodAction MethodName="Window_Loaded" TargetObject="{Binding .}" />
-        </Interactivity:EventTrigger>
-    </Interactivity:Interaction.Triggers>
+    <d:Window.DataContext>
+        <vm:MainWindowViewModel x:Name="vm" />
+    </d:Window.DataContext>
+
     <Window.InputBindings>
         <KeyBinding
             Key="W"
@@ -122,6 +123,7 @@
             Command="{Binding PressKeyCommand}"
             CommandParameter="{Binding ElementName=btnRight}" />
     </Window.InputBindings>
+    <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
 
     <Grid>
         <Grid.Resources>
@@ -139,17 +141,66 @@
                 </Style.Triggers>
             </Style>
         </Grid.Resources>
-        <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
-        <Button
-            x:Name="imgHost"
-            FocusVisualStyle="{x:Null}"
-            Style="{x:Null}">
-            <Image
-                x:Name="csiImg"
-                d:Source="/Assets/Images/a3.jpeg"
-                Source="{Binding Img}"
-                Stretch="Fill" />
-        </Button>
+
+        <Image
+            x:Name="csiImg"
+            Source="{Binding Img}"
+            Stretch="Fill" />
+
+        <StackPanel
+            Margin="25"
+            VerticalAlignment="Top"
+            Orientation="Horizontal"
+            TextBlock.FontSize="25">
+            <TextBlock Text="IP: " />
+            <TextBox
+                Width="200"
+                Padding="10,0,0,0"
+                VerticalContentAlignment="Center"
+                Background="Transparent"
+                BorderThickness="0"
+                CaretBrush="{Binding Foreground, Mode=OneWay, RelativeSource={RelativeSource Mode=Self}}"
+                Foreground="{StaticResource Control.Foreground}"
+                IsReadOnly="{Binding IsChecked, Mode=OneWay, ElementName=togBtnStatus}"
+                Text="192.168.1.1" />
+
+            <ToggleButton
+                x:Name="togBtnStatus"
+                Width="25"
+                Height="25"
+                Background="Transparent"
+                IsChecked="{Binding Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                IsThreeState="False">
+                <ToggleButton.Style>
+                    <Style TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Foreground" Value="{StaticResource Control.Foreground}" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Ellipse
+                                        Width="{TemplateBinding Width}"
+                                        Height="{TemplateBinding Height}"
+                                        Cursor="Hand"
+                                        Fill="{TemplateBinding Foreground}" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Foreground" Value="Green" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Foreground" Value="Gray" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+
+
+            </ToggleButton>
+        </StackPanel>
+
 
 
 

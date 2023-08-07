@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:Raspberry.Client"
              xmlns:prism="http://prismlibrary.com/" >
     <Application.Resources>
-         
+        <SolidColorBrush x:Key="Control.Foreground" Color="#FFF4F4F4" />
     </Application.Resources>
 </prism:PrismApplication>

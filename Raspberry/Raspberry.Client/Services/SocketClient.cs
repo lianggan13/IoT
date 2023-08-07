@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,76 +10,167 @@ namespace Raspberry.Client.Services
 {
     public class SocketClient
     {
-        private readonly Socket socket;
-        private NetworkStream netStream;
+        private Socket socket;
         public event Action<object, byte[]> Received = null;
         public SocketClient()
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
         public void Connect(string serverIp, int serverPort)
         {
             try
             {
-                socket.Connect(serverIp, serverPort);
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                //socket.Connect(serverIp, serverPort);
+                var endPoint = new IPEndPoint(IPAddress.Parse(serverIp), serverPort);
+
+                socket.BeginConnect(endPoint, ConnectCallback, null);
             }
-            catch (SocketException ex)
+            catch (Exception ex)
+            {
+                Debug.Fail(ex.Message);
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            socket.EndConnect(ar);
+
+
+            Task.Factory.StartNew(() =>
+                Receiver(), //ReceiverAsync(),
+                TaskCreationOptions.LongRunning);
+        }
+
+        public void Disconnect()
+        {
+            try
+            {
+                if (socket != null)
+                {
+                    socket.Shutdown(SocketShutdown.Both);
+                    socket.Close();
+                    socket.Dispose();
+                    socket = null;
+
+                    // disconnected event...
+                }
+            }
+            catch (Exception ex)
             {
                 Debug.Fail(ex.Message);
             }
 
-            if (!socket.Connected)
-                return;
-
-            netStream = new NetworkStream(socket, ownsSocket: true);
-            netStream.ReadTimeout = 5000;
-
-            Task.Factory.StartNew(() =>
-                Receiver(),
-                TaskCreationOptions.LongRunning);
         }
 
         public void Send(string data)
         {
-            if (netStream?.CanWrite == true)
+            //data = $"{data} {DateTime.Now:yyyy MM dd HH:mm:ss}";
+            byte[] buffer = Encoding.UTF8.GetBytes($"{data}");
+            socket.Send(buffer);
+        }
+
+        private void Receiver()
+        {
+            while (socket != null && socket.Connected)
             {
-                //data = $"{data} {DateTime.Now:yyyy MM dd HH:mm:ss}";
-                byte[] buffer = Encoding.UTF8.GetBytes($"{data}");
-                netStream.Write(buffer, 0, buffer.Length);
-                netStream.Flush();
+                int bytesRead = 0;
+                byte[] lengthBuf = new byte[4];
+
+                try
+                {
+                    // 接收当前帧的长度
+                    while (lengthBuf.Length < 4)
+                    {
+                        bytesRead += socket.Receive(lengthBuf, bytesRead, lengthBuf.Length - bytesRead, SocketFlags.None);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (lengthBuf.Length < 0)
+                    {
+                        break;
+                    }
+
+                    // 解析当前帧的长度
+                    int frame_length = 0;
+                    if (lengthBuf.Length == 4)
+                    {
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(lengthBuf);
+
+                        frame_length = BitConverter.ToInt32(lengthBuf, 0);
+                        Debug.WriteLine($"Frame Length: {frame_length}");
+                    }
+
+                    // 接收当前帧的数据
+                    bytesRead = 0;
+                    byte[] frameBuf = new byte[frame_length];
+                    while (frameBuf.Length < frame_length)
+                    {
+                        //int bytesRead = socket.Receive(readBuffer);
+                        bytesRead += socket.Receive(frameBuf, bytesRead, frameBuf.Length - bytesRead, SocketFlags.None);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    // 解析当前帧的数据
+                    if (frameBuf.Length == frame_length)
+                    {
+                        Debug.WriteLine($"Frame Data: {frameBuf.Length}");
+                        Received?.Invoke(this, frameBuf);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Disconnect();
+                    Debug.WriteLine(ex.Message);
+                }
             }
         }
 
-        private async void Receiver()
+        private void ReceiverAsync()
         {
-            const int ReadBufferSize = 1024 * 512;
-            byte[] readBuffer = new byte[ReadBufferSize];
-
-            try
+            while (socket != null && socket.Connected)
             {
-                while (netStream.CanRead)
+                try
                 {
-                    var data = new List<byte>();
-                    int bytesRead = 0;
-                    while (netStream.DataAvailable)
+                    if (socket.Poll(int.MaxValue, SelectMode.SelectRead))
                     {
-                        bytesRead = await netStream.ReadAsync(readBuffer, 0, readBuffer.Length);
-                        data.AddRange(readBuffer.Take(bytesRead));
-                        Debug.WriteLine($"Read: {bytesRead}");
-                    }
+                        if (!(socket != null && socket.Connected))
+                            continue;
 
-                    if (bytesRead > 0)
-                        Received?.Invoke(this, data.ToArray());
+                        byte[] buffer = new byte[BufferSize];
+                        socket.BeginReceive(buffer, 0, BufferSize, SocketFlags.None, ReceiveAsyncCallback, buffer);
+                    }
+                    else
+                    {
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Disconnect();
+                    Debug.WriteLine(ex.Message);
                 }
             }
-            catch (OperationCanceledException ex)
+        }
+
+        private void ReceiveAsyncCallback(IAsyncResult result)
+        {
+            int bytesRead = socket.EndReceive(result);
+            if (bytesRead > 0)
             {
-                Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
-                Array.Clear(readBuffer, 0, ReadBufferSize);
+                byte[] data = result.AsyncState as byte[];
+                if (bytesRead > 0)
+                {
+                    Debug.WriteLine($"Read: {bytesRead}");
+                    Received?.Invoke(this, data.Take(bytesRead).ToArray());
+                }
             }
         }
     }
