@@ -60,6 +60,8 @@ class Camera:
                         image = Image.open(image_stream) # open --> verify --> open --> save
                         image.save('a1.jpeg',format('JPEG'))
                         '''
+
+                        # 清空流以进行下一帧捕获
                         stream.seek(0)
                         stream.truncate()
                         
