@@ -3,7 +3,12 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <PackageIcon>logo.png</PackageIcon>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="logo.ico" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Expression.Blend.SDK.WPF" Version="4.0.0" />
     <PackageReference Include="Prism.Unity" Version="8.1.97" />
