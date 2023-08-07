@@ -3,10 +3,8 @@ using Prism.Mvvm;
 using Raspberry.Client.AttachedProperties;
 using Raspberry.Client.Services;
 using Raspberry.Client.Utils;
-using Raspberry.Client.Views;
 using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,16 +12,34 @@ using System.Windows.Media;
 
 namespace Raspberry.Client.ViewModels
 {
-    public class MainViewModel : BindableBase
+    public class MainWindowViewModel : BindableBase
     {
-        private string _title = "Raspberry Application";
-        private SocketClient socketClient;
+        private SocketClient socketClient = new SocketClient();
 
+        private string _title = "Raspberry Application";
         public string Title
         {
             get { return _title; }
             set { SetProperty(ref _title, value); }
         }
+
+        private string ip = "192.168.1.1";
+
+        public string IP
+        {
+            get { return ip; }
+            set { SetProperty(ref ip, value); }
+        }
+
+
+        private bool status = false;
+
+        public bool Status
+        {
+            get { return status; }
+            set { SetProperty(ref status, value); }
+        }
+
         public DelegateCommand<object> PressKeyCommand => new DelegateCommand<object>(PressKey);
 
 
@@ -35,27 +51,41 @@ namespace Raspberry.Client.ViewModels
             set { SetProperty(ref img, value); }
         }
 
-        public MainViewModel()
+        public MainWindowViewModel()
         {
-
+            this.PropertyChanged += MainViewModel_PropertyChanged;
         }
 
-        public void Window_Loaded(object sender, RoutedEventArgs e)
+        private void MainViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Task.Run(() =>
+            switch (e.PropertyName)
             {
-                try
+                case nameof(Status):
+                    StatusChanged();
+                    break;
+            }
+        }
+
+        private void StatusChanged()
+        {
+            try
+            {
+                if (status)
                 {
-                    socketClient = new SocketClient();
-                    socketClient.Connect("192.168.4.1", 32769);
-                    ////socketClient.Connect("192.168.", 32769);
+                    socketClient.Connect(IP, 32769);
                     socketClient.Received += SocketClient_Received;
                 }
-                catch (System.Exception ex)
+                else
                 {
-                    Debug.Fail(ex.ToString());
+                    socketClient.Received -= SocketClient_Received;
+                    socketClient.Disconnect();
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                Status = false;
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void SocketClient_Received(object arg1, byte[] data)
@@ -77,7 +107,6 @@ namespace Raspberry.Client.ViewModels
                 //Debug.Fail(ex.ToString());
             }
         }
-
 
         private void PressKey(object para)
         {
@@ -102,7 +131,7 @@ namespace Raspberry.Client.ViewModels
                 Key key = ButtonKeyBoard.GetKey(btn);
                 if (key == e.Key)
                 {
-                    (Application.Current.MainWindow as MainWindow).imgHost.Focus();
+                    //(Application.Current.MainWindow as MainWindow).imgHost.Focus();
                     Debug.WriteLine($"{nameof(Btn_KeyUp)}:{key}");
                     socketClient.Send($"P");
                 }
