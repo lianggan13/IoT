@@ -57,13 +57,15 @@ class CameraTerrace:
 	def MoveX(self):
 		dc = self.Angle2DutyCycle(self.rx)
 		self.pwmX.ChangeDutyCycle(dc)
-		time.sleep(0.02)
+		time.sleep(0.03)
+		self.pwmX.ChangeDutyCycle(0)
 		print ("X:%f" % self.rx)
 
 	def MoveY(self):
 		dc = self.Angle2DutyCycle(self.ry)
 		self.pwmY.ChangeDutyCycle(dc)
-		time.sleep(0.02)
+		time.sleep(0.03)
+		self.pwmY.ChangeDutyCycle(0)
 		print ("Y:%f" % self.ry)
 
 	def Angle2DutyCycle(self,r:float):

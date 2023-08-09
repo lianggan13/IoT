@@ -17,7 +17,7 @@ import asyncio
 
 P_BUTTON = 20 # key button pin
 api_btn_state = "/api/btn/state"
-server = TcpServer("192.168.1.1",32769)
+server = TcpServer("192.168.13.1",32769)
 wheel = MotorWheel()
 terrace = CameraTerrace()
 camera = Camera()
@@ -57,7 +57,7 @@ def handle_camera_capured(sender:Camera,data:bytes):
     for h in list(server._clients.keys()):
         # camera.capture(stream, format='jpeg')
         server.send_data(h,data)
-        print('data len = %d' % len(data))
+        #print('data len = %d' % len(data))
     
 async def main():
     server.connected_event += handle_client_connected
