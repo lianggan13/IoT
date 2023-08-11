@@ -13,62 +13,53 @@ class CameraTerrace:
 		GPIO.setup(PinX,GPIO.OUT)
 		GPIO.setup(PinY,GPIO.OUT)
 		self.pwmX = GPIO.PWM(PinX,50) 	# 50Hz
-		self.pwmX.start(0)				# Init DutyCycle
+		self.pwmX.start(2.5)		    # Duty: 0% or 2.5% --> Angle: 0°
 		self.pwmY = GPIO.PWM(PinY,50)
-		self.pwmY.start(0)
+		self.pwmY.start(2.5)
 		time.sleep(0.02)
-		self.rx = 90.0
-		self.ry = 45.0
+		self.rx = 40.0
+		self.ry = 40.0
 		self.MoveX()
+		
 		self.MoveY()
 
 	def Left(self):
-		r = self.rx + 1.0
-		if(self.ValidateAngle(r)==False):
+		angle = self.rx + 5.0
+		if(self.ValidateAngleX(angle)==False):
 			return
-		self.rx = r
+		self.rx = angle
 		self.MoveX()
 
 	def Right(self):
-		r = self.rx - 1.0
-		if(self.ValidateAngle(r)==False):
+		angle = self.rx - 5.0
+		if(self.ValidateAngleX(angle)==False):
 			return
-		self.rx = r
+		self.rx = angle
 		self.MoveX()
 
 	def Up(self):
-		r = self.ry - 1.0
-		if(self.ValidateAngle(r)==False):
+		angle = self.ry - 5.0
+		if(self.ValidateAngleY(angle)==False):
 			return
-		self.ry = r
+		self.ry = angle
 		self.MoveY()
 	
 	def Down(self):
-		r = self.ry + 1.0
-		if(self.ValidateAngle(r)==False):
+		angle = self.ry + 5.0
+		if(self.ValidateAngleY(angle)==False):
 			return
-		self.ry = r
+		self.ry = angle
 		self.MoveY()
 
-	def Stop(self):
-		self.pwmX.ChangeDutyCycle(0)
-		self.pwmY.ChangeDutyCycle(0)
-
 	def MoveX(self):
-		dc = self.Angle2DutyCycle(self.rx)
-		self.pwmX.ChangeDutyCycle(dc)
-		time.sleep(0.03)
-		self.pwmX.ChangeDutyCycle(0)
-		print ("X:%f" % self.rx)
+		self.SetAngle(PinX,self.pwmX,self.rx)
+		print (":%f" % self.rx)
 
 	def MoveY(self):
-		dc = self.Angle2DutyCycle(self.ry)
-		self.pwmY.ChangeDutyCycle(dc)
-		time.sleep(0.03)
-		self.pwmY.ChangeDutyCycle(0)
+		self.SetAngle(PinY,self.pwmY,self.ry)
 		print ("Y:%f" % self.ry)
 
-	def Angle2DutyCycle(self,r:float):
+	def SetAngle(self,servoPin,pwm,angle:float):
 		'''
 		SG90 Total T is 20ms (50Hz)
 		High T			Angle    DutyCycle
@@ -78,11 +69,24 @@ class CameraTerrace:
 		2.0ms-----------135°	  10.0%
 		2.5ms-----------180°	  12.5%
 		'''
-		return 2.5 + r/360*20
+		duty =  angle/360*20 + 2.5
+		print ("Duty:%f%%" % duty)
+		# GPIO.output(servoPin, True)
+		pwm.ChangeDutyCycle(duty)
+		time.sleep(0.5)
+		# GPIO.output(servoPin, False)
+		pwm.ChangeDutyCycle(0)  # 停止PWM
+		time.sleep(0.1)
 	
-	def ValidateAngle(self,r:float):
-		if r<0 or r>180:
-			print ("Angle must be [0,180]")
+	def ValidateAngleX(self,angle:float):
+		if angle<-5 or angle>75:
+			print ("Angle must be [-5,75]")
+			return False
+		return True
+	
+	def ValidateAngleY(self,angle:float):
+		if angle<-10 or angle>105:
+			print ("Angle must be [-10,105]")
 			return False
 		return True
 
@@ -96,8 +100,6 @@ class CameraTerrace:
 				self.Down()
 			elif(cmd.upper() == 'RIGHT'):
 				self.Right()
-			elif(cmd.upper() == 'P'):
-				self.Stop()
 		except KeyboardInterrupt:
 			self.pwmX.stop()
 			self.pwmY.stop()
@@ -106,9 +108,13 @@ class CameraTerrace:
 if __name__ == "__main__":
 	try:
 		t = CameraTerrace()
-		while True:
-			ch = input(">>")
-			t.SendCmd(ch)
+		for i in range(0,180):
+			input(">> (Enter)")
+			t.SendCmd('LEFT')
+
+		# while True:
+		# 	ch = input(">>")
+		# 	t.SendCmd(ch)
 	except KeyboardInterrupt:
 		pass
 		GPIO.cleanup()

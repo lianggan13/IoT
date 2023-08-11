@@ -39,9 +39,12 @@ def button_state_changed(args):
 
 def handle_client_connected(sender:TcpServer,host:str):
     print ("√ connected with client at %s" % host)
+    _thread.start_new_thread(camera.Start,())
 
 def handle_client_disconnected(sender:TcpServer,host:str):
     print ("× disConnected with client at %s" % host)
+    camera.Stop()
+    wheel.Stop()
 
 def handle_client_received(sender:TcpServer,host:str,msg:str):
     print(">> %s len: %s from [%s] %s" % (msg, str(len(msg)),host,
@@ -51,7 +54,6 @@ def handle_client_received(sender:TcpServer,host:str,msg:str):
 
 def handle_exception(sender:TcpServer,exp:str):
     print (exp)
-
 
 def handle_camera_capured(sender:Camera,data:bytes):
     for h in list(server._clients.keys()):
@@ -65,7 +67,7 @@ async def main():
     server.received_event += handle_client_received
     server.exception_event += handle_exception
     camera.capured_event += handle_camera_capured
-    _thread.start_new_thread(camera.start,())
+    
     await server.start()
 
     

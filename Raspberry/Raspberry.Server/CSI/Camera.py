@@ -19,8 +19,8 @@ class Camera:
     """
     def __init__(self) -> None:
         self.capured_event = Event()
-
-    def start(self):
+        self.isplaying = False
+    def Start(self):
         ''' google...
         https://blog.csdn.net/talkxin/article/details/50504601
         https://picamera.readthedocs.io/en/release-1.13/api_streams.html
@@ -53,13 +53,15 @@ class Camera:
                 #camera.use_gpu = True   # 启用GPU来进行图像预处理,可能会提高性能
                 
                 #camera.start_preview()
+                self.isplaying = True
                 time.sleep(2)
                 try:
                     stream = io.BytesIO()
                     for _ in camera.capture_continuous(stream,format='jpeg',use_video_port=True):
                         # Truncate the stream to the current position (in case
                         # prior iterations output a longer image)
-                        
+                        if(self.isplaying == False):
+                            break
                         # 获取当前帧的数据
                         frame_data = stream.getvalue()
 
@@ -93,6 +95,10 @@ class Camera:
                 finally:
                     camera.close()
 
+    def Stop(self):
+        self.isplaying = False
+               
+
 if __name__ == "__main__":
     camera =  Camera()
-    camera.start()
+    camera.Start()
