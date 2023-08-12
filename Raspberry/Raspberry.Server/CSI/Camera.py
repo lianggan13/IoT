@@ -19,8 +19,8 @@ class Camera:
     """
     def __init__(self) -> None:
         self.capured_event = Event()
-
-    def start(self):
+        self.isplaying = False
+    def Start(self):
         ''' google...
         https://blog.csdn.net/talkxin/article/details/50504601
         https://picamera.readthedocs.io/en/release-1.13/api_streams.html
@@ -31,7 +31,7 @@ class Camera:
                 camera.hflip = True
                 #camera.resolution = (640,480)  # VGA 分辨率 
                 camera.resolution = (320, 240) # QVGA 分辨率
-                camera.framerate = 25       # ��Ƶ֡��(֡/s)
+                camera.framerate = 25       # 视频帧率(帧/s)
                 camera.image_effect = 'denoise' # 降噪 
                 # camera.annotate_background = picamera.Color('black') # 黑色背景 
                 #camera.annotate_text_size = 20 # 小号字体
@@ -44,8 +44,8 @@ class Camera:
                 # xxxx...
                 # camera.focus_mode = 'fixed'
                 # camera.focus_autothreshold  = 'fixed' # 固定对焦
-                #camera.quality  = 10        # ��Ƶ��������(ȡֵ��ΧΪ 0-40��ֵԽС����������Խ��)
-                #camera.bitrate  = 1000000   # ��Ƶ������ bps(������Խ�ͣ���������Խ��)
+                #camera.quality  = 10        # 视频编码质量(取值范围为 0-40，值越小，画面质量越低)
+                #camera.bitrate  = 1000000   # 视频比特率 bps(比特率越低，画面质量越低)
                 #camera.still_stats.bitrate = 1000000 # 设置图像捕获的比特率,单位是比特/秒  
                 #camera.video_stats.bitrate = 2000000 # 设置视频录制的比特率
                 #camera.image_stabilization = False # 关闭图像稳定可以提高性能,但画面会抖动
@@ -53,22 +53,24 @@ class Camera:
                 #camera.use_gpu = True   # 启用GPU来进行图像预处理,可能会提高性能
                 
                 #camera.start_preview()
+                self.isplaying = True
                 time.sleep(2)
                 try:
                     stream = io.BytesIO()
                     for _ in camera.capture_continuous(stream,format='jpeg',use_video_port=True):
                         # Truncate the stream to the current position (in case
                         # prior iterations output a longer image)
-                        
-                        # ��ȡ��ǰ֡������
+                        if(self.isplaying == False):
+                            break
+                        # 获取当前帧的数据
                         frame_data = stream.getvalue()
 
-                        # ��ȡ��ǰ֡�ĳ���
+                        # 获取当前帧的长度
                         frame_length = len(frame_data)
 
-                        # ����ǰֱ֡��תΪ�ֽ�����
+                        # 将当前帧直接转为字节数组
                         length_data =  frame_length.to_bytes(4, byteorder='big')
-                        # ����ǰ֡�ĳ��ȴ��Ϊ4�ֽڵ��޷�������
+                        # 将当前帧的长度打包为4字节的无符号整数
                         #length_data = struct.pack('!I', frame_length)
                         
                         if(self.capured_event != None):
@@ -85,7 +87,7 @@ class Camera:
                         image.save('a1.jpeg',format('JPEG'))
                         '''
 
-                        # ������Խ�����һ֡����
+                        # 清空流以进行下一帧捕获
                         stream.seek(0)
                         stream.truncate()
                 except Exception as ex:
@@ -93,6 +95,10 @@ class Camera:
                 finally:
                     camera.close()
 
+    def Stop(self):
+        self.isplaying = False
+               
+
 if __name__ == "__main__":
     camera =  Camera()
-    camera.start()
+    camera.Start()

@@ -17,7 +17,7 @@ import asyncio
 
 P_BUTTON = 20 # key button pin
 api_btn_state = "/api/btn/state"
-server = TcpServer("192.168.1.1",32769)
+server = TcpServer("192.168.13.1",32769)
 wheel = MotorWheel()
 terrace = CameraTerrace()
 camera = Camera()
@@ -39,9 +39,12 @@ def button_state_changed(args):
 
 def handle_client_connected(sender:TcpServer,host:str):
     print ("√ connected with client at %s" % host)
+    _thread.start_new_thread(camera.Start,())
 
 def handle_client_disconnected(sender:TcpServer,host:str):
     print ("× disConnected with client at %s" % host)
+    camera.Stop()
+    wheel.Stop()
 
 def handle_client_received(sender:TcpServer,host:str,msg:str):
     print(">> %s len: %s from [%s] %s" % (msg, str(len(msg)),host,
@@ -52,12 +55,11 @@ def handle_client_received(sender:TcpServer,host:str,msg:str):
 def handle_exception(sender:TcpServer,exp:str):
     print (exp)
 
-
 def handle_camera_capured(sender:Camera,data:bytes):
     for h in list(server._clients.keys()):
         # camera.capture(stream, format='jpeg')
         server.send_data(h,data)
-        print('data len = %d' % len(data))
+        #print('data len = %d' % len(data))
     
 async def main():
     server.connected_event += handle_client_connected
@@ -65,7 +67,7 @@ async def main():
     server.received_event += handle_client_received
     server.exception_event += handle_exception
     camera.capured_event += handle_camera_capured
-    _thread.start_new_thread(camera.start,())
+    
     await server.start()
 
     
