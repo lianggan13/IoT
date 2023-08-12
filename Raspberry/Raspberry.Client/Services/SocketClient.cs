@@ -66,8 +66,11 @@ namespace Raspberry.Client.Services
         public void Send(string data)
         {
             //data = $"{data} {DateTime.Now:yyyy MM dd HH:mm:ss}";
-            byte[] buffer = Encoding.UTF8.GetBytes($"{data}");
-            socket.Send(buffer);
+            if (socket != null && socket.Connected)
+            {
+                byte[] buffer = Encoding.UTF8.GetBytes($"{data}");
+                socket.Send(buffer);
+            }
         }
 
         private void Receiver()
@@ -102,7 +105,7 @@ namespace Raspberry.Client.Services
                             Array.Reverse(lengthBuf);
 
                         frame_length = BitConverter.ToInt32(lengthBuf, 0);
-                        Debug.WriteLine($"Frame Length: {frame_length}");
+                        //Debug.WriteLine($"Frame Length: {frame_length}");
                     }
 
                     // 接收当前帧的数据
@@ -121,7 +124,7 @@ namespace Raspberry.Client.Services
                     // 解析当前帧的数据
                     if (frameBuf.Length == frame_length)
                     {
-                        Debug.WriteLine($"Frame Data: {frameBuf.Length}");
+                        //Debug.WriteLine($"Frame Data: {frameBuf.Length}");
                         Received?.Invoke(this, frameBuf);
                     }
                 }

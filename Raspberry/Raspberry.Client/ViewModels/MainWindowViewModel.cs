@@ -1,10 +1,12 @@
-﻿using Prism.Commands;
-using Prism.Mvvm;
+﻿using Prism.Mvvm;
+using Prism.Regions;
 using Raspberry.Client.AttachedProperties;
 using Raspberry.Client.Services;
 using Raspberry.Client.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,14 +25,13 @@ namespace Raspberry.Client.ViewModels
             set { SetProperty(ref _title, value); }
         }
 
-        private string ip = "192.168.1.1";
+        private string ip = "192.168.13.1";
 
         public string IP
         {
             get { return ip; }
             set { SetProperty(ref ip, value); }
         }
-
 
         private bool status = false;
 
@@ -39,9 +40,6 @@ namespace Raspberry.Client.ViewModels
             get { return status; }
             set { SetProperty(ref status, value); }
         }
-
-        public DelegateCommand<object> PressKeyCommand => new DelegateCommand<object>(PressKey);
-
 
         private ImageSource img;
 
@@ -53,6 +51,13 @@ namespace Raspberry.Client.ViewModels
 
         public MainWindowViewModel()
         {
+        }
+
+        public MainWindowViewModel(IRegionManager regionManager) : this()
+        {
+            Keyboard.AddPreviewKeyDownHandler(Application.Current.MainWindow, OnPreviewKeyDown);
+            Keyboard.AddPreviewKeyUpHandler(Application.Current.MainWindow, OnPreviewKeyUp);
+
             this.PropertyChanged += MainViewModel_PropertyChanged;
         }
 
@@ -95,48 +100,65 @@ namespace Raspberry.Client.ViewModels
                 //System.Drawing.Bitmap bitmap = ImageHelper.Buffer2Bitmap(data);
                 //System.Drawing.Image t_img = ImageHelper.AddTextToImg(bitmap, $"{DateTime.Now:HH:mm:ss}", 12.0f, bitmap.Width - 10, bitmap.Height - 10, 120, System.Drawing.Imaging.ImageFormat.Jpeg);
 
-                Application.Current?.Dispatcher.Invoke(() =>
+                //Application.Current?.Dispatcher.Invoke(() =>
+                //{
+                //    Img = ImageHelper.Bytes2BitmapImage(data);
+                //});
+
+                Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
                     Img = ImageHelper.Bytes2BitmapImage(data);
-                    //Img = ImageHelper.BitmapToBitmapImage(new System.Drawing.Bitmap(t_img));
-                });
+
+                }, System.Windows.Threading.DispatcherPriority.Background);
 
             }
             catch (Exception ex)
             {
-                //Debug.Fail(ex.ToString());
+                Debug.Fail(ex.ToString());
             }
         }
 
-        private void PressKey(object para)
+        Lazy<List<Button>> buttons = new Lazy<List<Button>>(() =>
         {
-            Button btn = para as Button;
-            if (!btn.IsFocused)
+            return UIControlHelper.GetLogicChildObjects<Button>(Application.Current.MainWindow);
+        });
+
+        private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            Button btn = e.Source as Button;
+            if (btn == null || ButtonKeyBoard.GetKey(btn) != e.Key)
             {
-                //btn.Focus();
-                Keyboard.Focus(btn);
+                btn = buttons.Value.SingleOrDefault(b => ButtonKeyBoard.GetKey(b) == e.Key);
+                if (btn == null)
+                    return;
             }
 
+            if (btn.IsEnabled)
+                btn.IsEnabled = false;
+            else if (e.Key == Key.W || e.Key == Key.A || e.Key == Key.S || e.Key == Key.D)
+                return;
 
-            Key key = ButtonKeyBoard.GetKey(btn);
-            Debug.WriteLine($"{nameof(PressKey)}:{key}");
-            socketClient.Send($"{key}");
+            Debug.WriteLine($"{nameof(OnPreviewKeyDown)}:{e.Key}");
+            socketClient.Send($"{e.Key}");
         }
 
-
-        public void Btn_KeyUp(object sender, KeyEventArgs e)
+        private void OnPreviewKeyUp(object sender, KeyEventArgs e)
         {
-            if (sender is Button btn)
+            Button btn = e.Source as Button;
+            if (btn == null || ButtonKeyBoard.GetKey(btn) != e.Key)
             {
-                Key key = ButtonKeyBoard.GetKey(btn);
-                if (key == e.Key)
-                {
-                    //(Application.Current.MainWindow as MainWindow).imgHost.Focus();
-                    Debug.WriteLine($"{nameof(Btn_KeyUp)}:{key}");
-                    socketClient.Send($"P");
-                }
+                btn = buttons.Value.SingleOrDefault(b => ButtonKeyBoard.GetKey(b) == e.Key);
+                if (btn == null)
+                    return;
             }
-            e.Handled = true;
+
+            if (!btn.IsEnabled)
+                btn.IsEnabled = true;
+            else if (e.Key == Key.W || e.Key == Key.A || e.Key == Key.S || e.Key == Key.D)
+                return;
+
+            Debug.WriteLine($"{nameof(OnPreviewKeyUp)}:{e.Key}");
+            socketClient.Send($"P");
         }
     }
 }
