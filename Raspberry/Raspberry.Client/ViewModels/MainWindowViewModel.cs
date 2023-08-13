@@ -97,20 +97,10 @@ namespace Raspberry.Client.ViewModels
         {
             try
             {
-                //System.Drawing.Bitmap bitmap = ImageHelper.Buffer2Bitmap(data);
-                //System.Drawing.Image t_img = ImageHelper.AddTextToImg(bitmap, $"{DateTime.Now:HH:mm:ss}", 12.0f, bitmap.Width - 10, bitmap.Height - 10, 120, System.Drawing.Imaging.ImageFormat.Jpeg);
-
-                //Application.Current?.Dispatcher.Invoke(() =>
-                //{
-                //    Img = ImageHelper.Bytes2BitmapImage(data);
-                //});
-
                 Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
                     Img = ImageHelper.Bytes2BitmapImage(data);
-
-                }, System.Windows.Threading.DispatcherPriority.Background);
-
+                });
             }
             catch (Exception ex)
             {
