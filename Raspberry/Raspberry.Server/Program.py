@@ -4,7 +4,7 @@ from TCP.socketcom import *
 from L298N.MotorWheel import *
 from SG90.CameraTerrace import *
 from CSI.Camera import *
-from Relay.SPDT import *
+from Relay.SRD import *
 from threading import Thread
 import sys,time,_thread
 import datetime
@@ -22,7 +22,7 @@ server = TcpServer("192.168.13.1",32769)
 wheel = MotorWheel()
 terrace = CameraTerrace()
 camera = Camera()
-spdt = SPDT()
+srd = SRD()
 
 
 def setup():
@@ -41,12 +41,12 @@ def button_state_changed(args):
 
 def handle_client_connected(sender:TcpServer,host:str):
     print ("√ connected with client at %s" % host)
-    spdt.ON()
+    srd.ON()
     _thread.start_new_thread(camera.Start,())
 
 def handle_client_disconnected(sender:TcpServer,host:str):
     print ("× disConnected with client at %s" % host)
-    spdt.OFF()
+    srd.OFF()
     camera.Stop()
     wheel.Stop()
 
@@ -74,7 +74,7 @@ async def main():
     await server.start()
 
 def dispose():
-    spdt.OFF()
+    srd.OFF()
     GPIO.cleanup()
 
 if __name__ == "__main__":

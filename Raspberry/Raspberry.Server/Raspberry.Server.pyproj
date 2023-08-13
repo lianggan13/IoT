@@ -55,6 +55,7 @@
     <Compile Include="Pioneer600\UART\RPI2B\python\uart.py" />
     <Compile Include="Pioneer600\UART\RPI3\python\uart.py" />
     <Compile Include="Program.py" />
+    <Compile Include="Relay\SRD.py" />
     <Compile Include="SG90\CameraTerrace.py" />
     <Compile Include="TCP\client1.py" />
     <Compile Include="TCP\server1.py" />
@@ -142,6 +143,7 @@
     <Folder Include="Pioneer600\UART\RPI3\" />
     <Folder Include="Pioneer600\UART\RPI3\python\" />
     <Folder Include="Pioneer600\UART\RPI3\wiringPi\" />
+    <Folder Include="Relay\" />
     <Folder Include="Utils\" />
     <Folder Include="SG90\" />
     <Folder Include="TCP\" />
