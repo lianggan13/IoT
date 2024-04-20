@@ -26,18 +26,33 @@ class TOFSense_F:
         d = bytearray(buffer)
         bytesRead = self.uart.write(d)
 
-        time.sleep(0.02)
+        # time.sleep(0.02)
 
         print("Wait recv blocked...")
         bytesRead = self.uart.any()  # Wait read blocked
         if(bytesRead > 0): 
             # buffer = self.uart.read()
-            buffer = bytearray(16)
+            buffer = bytearray(bytesRead)
             bytesRead =  self.uart.readinto(buffer,len(buffer))
             # print(">> %s. len = %s" % (buffer, bytesRead))   
             hex_str = ''.join([' 0x{:02X}'.format(x) for x in buffer])
             print(">> %s " % (hex_str))
 
+            key = 0x57
+            i = self.find_index(buffer,key)
+            if i != -1:
+                # index = buffer.index(key)
+                i = self.find_index(buffer,key)
+                i = i+8
+
+                disArr =  [buffer[i],buffer[i+1],buffer[i+2],0x00]
+                dis = int.from_bytes(bytes(disArr), 'little') *1.0/1000.0 
+
+                return dis
+            else:
+                print(">> Error")
+                return None
+            
             timeArr =  buffer[4:8]
             disArr =[buffer[8],buffer[9],buffer[10],0x00]
             statusArr = buffer[11:12]
@@ -50,24 +65,33 @@ class TOFSense_F:
             status = int.from_bytes(bytes(statusArr), 'little') 
             signalStreagth = int.from_bytes(bytes(signalStreagthArr), 'little') 
             rangePrecision = int.from_bytes(bytes(rangePrecisionArr), 'little') 
+
             # sumChk = int.from_bytes(bytes(sumChkArr), 'little') 
-            print("time(ms):            %s" % (systime))
-            print("dis(m):              %s" % (dis))
-            print("dis_status:          %s" % (status))
-            print("signal_strength:     %s" % (signalStreagth))
-            print("range_precision(cm): %s" % (rangePrecision))
+            # print("time(ms):            %s" % (systime))
+            # print("dis(m):              %s" % (dis))
+            # print("dis_status:          %s" % (status))
+            # print("signal_strength:     %s" % (signalStreagth))
+            # print("range_precision(cm): %s" % (rangePrecision))
             return dis
         else:
             print(">> (None)")
 
-        return 0.0
+        return None
+    
+    def find_index(self, bytearr, element):
+        for i in range(len(bytearr)):
+            if bytearr[i] == element:
+                return i
+        return -1
+
 
 if __name__ == "__main__":
     try:
         tof = TOFSense_F()
         time.sleep(1)
         while True:
-            tof.query()
+            dis =  tof.query()
+            print("dis(m): %s" % (dis))
             time.sleep(1)
     except Exception as ex:
         print("%s" % ex) 

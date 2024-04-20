@@ -18,6 +18,7 @@ class Digital:
                        read_buf_len=128)
 
     def display(self,str1:str):
+        print("Display: %s" % (str1))
         buffer = self.parse_string(str1)
         # buffer = self.parse_decimal(str1)
         d = bytearray(buffer)
@@ -31,7 +32,7 @@ class Digital:
             self.uart.readinto(buffer)
             # print(">> %s. len = %s" % (buffer, len))   
             hex_str = ''.join([' 0x{:02X}'.format(x) for x in buffer])
-            print(">> %s " % (hex_str))
+            # print(">> %s " % (hex_str))
             return buffer
         else:
             print(">> (None)")
@@ -118,7 +119,7 @@ class Digital:
         result.extend(CRC)
 
         hex_str = ''.join([' 0x{:02X}'.format(x) for x in result])
-        print("<< %s " % (hex_str))
+        # print("<< %s " % (hex_str))
 
         return result
 
