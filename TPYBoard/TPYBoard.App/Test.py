@@ -6,8 +6,10 @@ from pyb import UART, Pin #,RTC
 from TOFSense_F import *
 from digital import *
 # from NRF24L01.nrf24l01use import *
+from NRF24L01 import *
 
-from NRF24L01Use import *
+# from NRF24L01 import NRF24L01
+# from NRF24L01.NRF24L01 import * 
 
 
 def Test_TOFSense_F():
@@ -41,7 +43,8 @@ def Test_TOFSense_F():
 
 
 def Test_NRF24L01():
-    nrf=NRF24L01Use(spi=2,csn='Y5',ce='Y4')
+    nrf =  NRF24L01(spi=2,csn='Y5',ce='Y4', payload_size=8)
+    # nrf =  NRF24L01Use(spi=2,csn='Y5',ce='Y4')
     
     def recv():
         while True:
@@ -50,13 +53,14 @@ def Test_NRF24L01():
 
     _thread.start_new_thread(recv, ())
     
-    nrf2=NRF24L01Use(spi=1,csn='X5',ce='X4')
+    nrf2=NRF24L01(spi=1,csn='X5',ce='X4',payload_size=8)
+    # nrf2=NRF24L01Use(spi=1,csn='X5',ce='X4')
     i=0
     while True:
         i+=1
         nrf2.master(i)
         print("<< %s %s" % (i,get_current_time()))
-        time.sleep(10)
+        time.sleep(3)
 
     while True:
         pass

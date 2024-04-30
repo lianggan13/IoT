@@ -2,6 +2,8 @@
 """
 
 from micropython import const
+import ustruct as struct
+from pyb import Pin, SPI
 import utime
 
 # nRF24L01+ registers
@@ -49,6 +51,8 @@ FLUSH_TX     = const(0xe1) # flush TX FIFO
 FLUSH_RX     = const(0xe2) # flush RX FIFO
 NOP          = const(0xff) # use to read STATUS register
 
+pipes = (b'\xf0\xf0\xf0\xf0\xe1', b'\xf0\xf0\xf0\xf0\xd2')
+
 class NRF24L01:
     def __init__(self, spi, csn, ce, channel=46, payload_size=16):
         assert payload_size <= 32
@@ -56,16 +60,16 @@ class NRF24L01:
         self.buf = bytearray(1)
 
         # store the pins
-        self.spi = spi
-        self.csn = csn
-        self.ce = ce
+        self.spi = SPI(spi)
+        self.csn = Pin(csn, mode=Pin.OUT, value=1)
+        self.ce = Pin(ce, mode=Pin.OUT, value=0)
 
         # init the SPI bus and pins
         self.init_spi(4000000)
 
         # reset everything
-        ce.init(ce.OUT, value=0)
-        csn.init(csn.OUT, value=1)
+        self.ce.init(self.ce.OUT, value=0)
+        self.csn.init(self.csn.OUT, value=1)
 
         self.payload_size = payload_size
         self.pipe0_read_addr = None
@@ -250,3 +254,30 @@ class NRF24L01:
         status = self.reg_write(STATUS, RX_DR | TX_DS | MAX_RT)
         self.reg_write(CONFIG, self.reg_read(CONFIG) & ~PWR_UP)
         return 1 if status & TX_DS else 2
+
+    def master(self,data):
+        self.open_tx_pipe(pipes[0])
+        self.open_rx_pipe(1, pipes[1])
+        self.stop_listening()
+        try:	
+            self.send(struct.pack('i', data))	#发送内容 pack为封包函数
+            self.start_listening()
+            start_time = utime.ticks_ms()
+            timeout = False
+            while not self.any() and not timeout:
+                if utime.ticks_diff(utime.ticks_ms(), start_time) > 250:
+                    timeout = True
+        except OSError:
+            pass
+            
+    def slave(self):
+        self.open_tx_pipe(pipes[1])
+        self.open_rx_pipe(1, pipes[0])
+        self.start_listening()
+        while True:
+            if self.any():
+                while self.any():
+                    buf = self.recv()			#接收内容
+                    data,a= struct.unpack('ii', buf)#解析包unpack为解析包函数
+                break
+        return data
