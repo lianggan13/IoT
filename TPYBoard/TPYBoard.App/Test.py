@@ -1,15 +1,18 @@
 import time
 import utime
 import _thread
-from pyb import UART, Pin #,RTC
+from pyb import UART, Pin  # ,RTC
 
 from TOFSense_F import *
 from digital import *
 # from NRF24L01.nrf24l01use import *
 from NRF24L01 import *
+from NRF24L01.NRF24L01 import *
+from NRF24L01.NRF24L01_2 import *
+
 
 # from NRF24L01 import NRF24L01
-# from NRF24L01.NRF24L01 import * 
+# from NRF24L01.NRF24L01 import *
 
 
 def Test_TOFSense_F():
@@ -20,19 +23,19 @@ def Test_TOFSense_F():
         last = 0.0
         while True:
             curent = tof.query()
-            # if curent == None or curent == 0:  
-            if curent == None: #or curent == 0:  
-                # dig.display('----') 
+            # if curent == None or curent == 0:
+            if curent == None:  # or curent == 0:
+                # dig.display('----')
                 time.sleep(0.5)
                 continue
 
             disstr = str("{:.3f}".format(curent))
-            if abs(curent - last) > 0.030: # ±3cm
+            if abs(curent - last) > 0.030:  # ±3cm
                 last = curent
                 dig.display(disstr)
-            
-            if curent < 0.100: # 10cm
-                dig.display('5toP') 
+
+            if curent < 0.100:  # 10cm
+                dig.display('5toP')
                 time.sleep(1)
                 dig.display(disstr)
 
@@ -43,28 +46,50 @@ def Test_TOFSense_F():
 
 
 def Test_NRF24L01():
-    nrf =  NRF24L01(spi=2,csn='Y5',ce='Y4', payload_size=8)
-    # nrf =  NRF24L01Use(spi=2,csn='Y5',ce='Y4')
-    
+    nrf = NRF24L01(spi=2, csn='Y5', ce='Y4', payload_size=8)
+
     def recv():
         while True:
             s = nrf.slave()
-            print(">> %s %s" % (s,get_current_time()))
+            print(">> %s %s" % (s, get_current_time()))
 
     _thread.start_new_thread(recv, ())
-    
-    nrf2=NRF24L01(spi=1,csn='X5',ce='X4',payload_size=8)
-    # nrf2=NRF24L01Use(spi=1,csn='X5',ce='X4')
-    i=0
+
+    nrf2 = NRF24L01(spi=1, csn='X5', ce='X4', payload_size=8)
+    i = 0
     while True:
-        i+=1
+        i += 1
         nrf2.master(i)
-        print("<< %s %s" % (i,get_current_time()))
+        print("<< %s %s" % (i, get_current_time()))
         time.sleep(3)
 
     while True:
         pass
-       
+
+
+def Test_NRF24L01_2():
+    nrf = NRF24L01_2(spi=2, csn='Y5', ce='Y4', payload_size=32)
+
+    def recv():
+        while True:
+            s = nrf.NRF24L01_RxPacket()
+            print(">> %s %s" % (s, get_current_time()))
+
+    _thread.start_new_thread(recv, ())
+
+    nrf2 = NRF24L01_2(spi=1, csn='X5', ce='X4', payload_size=32)
+    i = 0
+    while True:
+        i += 1
+        # nrf2.master(i)
+        nrf2.Send_Buf(struct.pack('i', i))
+        print("<< %s %s" % (i, get_current_time()))
+        time.sleep(3)
+
+    while True:
+        pass
+
+
 def get_current_time():
     current_time = utime.time()
     local_time = utime.localtime(current_time)
@@ -74,6 +99,8 @@ def get_current_time():
     )
     return formatted_time
 
+
 print('Testing...')
 # Test_TOFSense_F()
 Test_NRF24L01()
+# Test_NRF24L01_2()
