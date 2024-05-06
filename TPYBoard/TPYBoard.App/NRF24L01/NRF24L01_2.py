@@ -62,7 +62,7 @@ pipes = (b'\xa5\xa5\xa5\xa5\xa5', b'\xa5\xa5\xa5\xa5\xa5')
 
 
 class NRF24L01_2:
-    def __init__(self, spi, csn, ce, channel=46, payload_size=16):
+    def __init__(self, spi, csn, ce, channel=0, payload_size=16):
         assert payload_size <= 32
 
         self.buf = bytearray(1)
@@ -92,39 +92,22 @@ class NRF24L01_2:
         # 禁用动态载荷后，数据包的大小将由RX_PW_P0寄存器（或其他接收管道的相应寄存器）中的设置确定，发送方发送的数据包将严格按照这个大小发送
         self.reg_write(DYNPD, 0)
 
-        # 选择通道0有效数据宽度
-        self.reg_write(RX_PW_P0, self.payload_size)
+        # auto retransmit delay: 1750us  设置自动重发间隔时间:1750us
+        # auto retransmit count: 8 最大自动重发次数:8次
+        self.reg_write(SETUP_RETR, (6 << 4) | 8)
 
-        address = pipes[0]
+        # set rf power and speed 设置TX发射参数,0db增益,250K,低噪声增益开启
+        # Best for point to point links
+        self.set_power_speed(POWER_3, SPEED_250K)
 
-        # 写TX节点地址
-        self.reg_write_bytes(TX_ADDR, address)
-        # 设置TX节点地址,主要为了使能ACK
-        self.reg_write_bytes(RX_ADDR_P0, address)
-        # self.reg_write_bytes(RX_ADDR_P0 + pipe_id, address)
+        # init CRC  Reg: CRCO EN_CRC
+        self.set_crc(2)
 
-        # 使能通道0的自动应答
-        self.reg_write(EN_AA, 0x01)
-        # 使能通道0的接收地址
-        self.reg_write(EN_RXADDR, 0x01)
-        # self.reg_write(EN_RXADDR, self.reg_read(EN_RXADDR) | (1 << pipe_id))
-        # 设置自动重发间隔时间:500us + 86us最大自动重发次数:10次
-        self.reg_write(SETUP_RETR, 0x1a)
-        # 设置RF通道为2.400GHz  频率=2.4+0GHz
-        self.reg_write(RF_CH, 0)
-        # 设置TX发射参数,0db增益,2Mbps,低噪声增益开启
-        self.reg_write(RF_SETUP, 0x0F)
+        # clear status flags
+        self.reg_write(STATUS, RX_DR | TX_DS | MAX_RT)
 
-        # 配置基本工作模式的参数PWR_UP,EN_CRC,16BIT_CRC,接收模式,开启所有中断
-        # CONFIG 地址 0x00 写配配置寄存器 值 0x0f(0b0000 1111)
-        # bit6 = 0 接收中断使能 RX_DR
-        # bit5 = 0 发射中断使能 TX_DS
-        # bit4 = 0 最大重发计数中断使能 MAX_RT
-        # bit3 = 1 使能CRC
-        # bit2 = 1 CRC长度配置 2bytes
-        # bit1 = 1 开机模式 PWR_UP
-        # bit0 = 1 接收模式
-        self.reg_write(CONFIG, 0x0f)
+        # set channel Reg:RF_CH
+        self.set_channel(channel)
 
         # flush buffers
         self.flush_rx()

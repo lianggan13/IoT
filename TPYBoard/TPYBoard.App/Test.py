@@ -72,7 +72,8 @@ def Test_NRF24L01_2():
 
     def recv():
         while True:
-            s = nrf.NRF24L01_RxPacket()
+            s = nrf.slave()
+            # s = nrf.NRF24L01_RxPacket()
             print(">> %s %s" % (s, get_current_time()))
 
     _thread.start_new_thread(recv, ())
@@ -81,8 +82,8 @@ def Test_NRF24L01_2():
     i = 0
     while True:
         i += 1
-        # nrf2.master(i)
-        nrf2.Send_Buf(struct.pack('i', i))
+        nrf2.master(i)
+        # nrf2.Send_Buf(struct.pack('i', i))
         print("<< %s %s" % (i, get_current_time()))
         time.sleep(3)
 
@@ -102,5 +103,5 @@ def get_current_time():
 
 print('Testing...')
 # Test_TOFSense_F()
-Test_NRF24L01()
-# Test_NRF24L01_2()
+# Test_NRF24L01()
+Test_NRF24L01_2()
