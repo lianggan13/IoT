@@ -17,20 +17,15 @@ RF_SETUP = const(0x06)
 STATUS = const(0x07)
 RX_ADDR_P0 = const(0x0a)
 TX_ADDR = const(0x10)
-RX_PW_P0 = const(0x11)	 # 接收数据通道0有效数据宽度(1~32字节)
-RX_PW_P1 = const(0x12)	 # 接收数据通道1有效数据宽度(1~32字节)
-RX_PW_P2 = const(0x13)	 # 接收数据通道2有效数据宽度(1~32字节)
-RX_PW_P3 = const(0x14)	 # 接收数据通道3有效数据宽度(1~32字节)
-RX_PW_P4 = const(0x15)	 # 接收数据通道4有效数据宽度(1~32字节)
-RX_PW_P5 = const(0x16)	 # 接收数据通道5有效数据宽度(1~32字节)
+RX_PW_P0 = const(0x11)
 FIFO_STATUS = const(0x17)
 DYNPD = const(0x1c)
 
 # CONFIG register
 EN_CRC = const(0x08)  # enable CRC
-CRCO = const(0x04)  # CRC encoding scheme 0=1 byte, 1=2 bytes
+CRCO = const(0x04)  # CRC encoding scheme; 0=1 byte, 1=2 bytes
 PWR_UP = const(0x02)  # 1=power up, 0=power down
-PRIM_RX = const(0x01)  # RX/TX control 0=PTX, 1=PRX
+PRIM_RX = const(0x01)  # RX/TX control; 0=PTX, 1=PRX
 
 # RF_SETUP register
 POWER_0 = const(0x00)  # -18 dBm
@@ -42,9 +37,9 @@ SPEED_2M = const(0x08)
 SPEED_250K = const(0x20)
 
 # STATUS register
-RX_DR = const(0x40)  # RX data ready write 1 to clear
-TX_DS = const(0x20)  # TX data sent write 1 to clear
-MAX_RT = const(0x10)  # max retransmits reached write 1 to clear
+RX_DR = const(0x40)  # RX data ready; write 1 to clear
+TX_DS = const(0x20)  # TX data sent; write 1 to clear
+MAX_RT = const(0x10)  # max retransmits reached; write 1 to clear
 
 # FIFO_STATUS register
 RX_EMPTY = const(0x01)  # 1 if RX FIFO is empty
@@ -57,12 +52,12 @@ FLUSH_TX = const(0xe1)  # flush TX FIFO
 FLUSH_RX = const(0xe2)  # flush RX FIFO
 NOP = const(0xff)  # use to read STATUS register
 
-# pipes = (b'\xf0\xf0\xf0\xf0\xe1', b'\xf0\xf0\xf0\xf0\xd2')
-pipes = (b'\xa5\xa5\xa5\xa5\xa5', b'\xa5\xa5\xa5\xa5\xa5')
+pipes = (b'\xf0\xf0\xf0\xf0\xe1', b'\xf0\xf0\xf0\xf0\xd2')
+# pipes = (b'\xa5\xa5\xa5\xa5\xa5', b'\xa5\xa5\xa5\xa5\xa5')
 
 
 class NRF24L01_2:
-    def __init__(self, spi, csn, ce, channel=0, payload_size=16):
+    def __init__(self, spi, csn, ce, channel=46, payload_size=16):
         assert payload_size <= 32
 
         self.buf = bytearray(1)
@@ -113,73 +108,13 @@ class NRF24L01_2:
         self.flush_rx()
         self.flush_tx()
 
-    def NRF24L01_RxPacket(self):
-        # self.open_tx_pipe(pipes[1])
-        # self.open_rx_pipe(1, pipes[0])
-        self.start_listening()
-        while True:
-            if self.any():
-                while self.any():
-                    buf = self.recv()  # 接收内容
-                    data, a = struct.unpack('ii', buf)  # 解析包unpack为解析包函数
-                break
-        return data
-
-    def Send_Buf(self, buf):
-        self.ce(0)
-        self.reg_write(CONFIG, 0x0e)  # 发射模式
-        self.ce(1)
-        utime.sleep_us(15)
-        self.NRF24L01_TxPacket(buf)
-        self.ce(0)
-        self.reg_write(CONFIG, 0x0e)  # 接收模式
-        self.ce(1)
-
-    def NRF24L01_TxPacket(self, buf, timeout=500):
-        # power up
-        # self.reg_write(CONFIG, (self.reg_read(CONFIG) | PWR_UP) & ~PRIM_RX)
-        # utime.sleep_us(150)
-        # send the data
-        self.ce(0)
-        self.spi.readinto(self.buf, W_TX_PAYLOAD)
-        self.spi.write(buf)
-        if len(buf) < self.payload_size:
-            # pad out data
-            self.spi.write(b'\x00' * (self.payload_size - len(buf)))
-        self.ce(1)
-
-        # enable the chip so it can send the data
-        self.ce(1)
-        utime.sleep_us(15)  # needs to be >10us
-        self.ce(0)
-
-        start = utime.ticks_ms()
-        result = None
-        while result is None and utime.ticks_diff(utime.ticks_ms(), start) < timeout:
-            if not (self.reg_read(STATUS) & (TX_DS | MAX_RT)):
-                break  # tx not finished
-
-            # either finished or failed: get and clear status flags, power down 清除TX_DS或MAX_RT中断标志
-            status = self.reg_write(STATUS, RX_DR | TX_DS | MAX_RT)
-            self.reg_write(CONFIG, self.reg_read(CONFIG) & ~PWR_UP)
-            result = 1 if status & TX_DS else 2
-
-        if result == 2:
-            print("send failed")
-
-        self.flush_tx()
-        self.flush_rx()
-
     def init_spi(self, baudrate):
-        # SPI.init(baudrate=1000000, *, polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck=None, mosi=None, miso=None, pins=(SCK, MOSI, MISO))
         try:
             master = self.spi.MASTER
-        except AttributeError as ex:
-            print("%s" % ex)
+        except AttributeError:
             self.spi.init(baudrate=baudrate, polarity=0, phase=0)
         else:
             self.spi.init(master, baudrate=baudrate, polarity=0, phase=0)
-            print("%s" % master)
 
     def reg_read(self, reg):
         self.csn(0)
@@ -195,7 +130,7 @@ class NRF24L01_2:
         self.csn(1)
         return self.buf[0]
 
-    def reg_write(self, reg, value: bytes):
+    def reg_write(self, reg, value):
         self.csn(0)
         self.spi.readinto(self.buf, 0x20 | reg)
         ret = self.buf[0]
@@ -213,7 +148,7 @@ class NRF24L01_2:
         self.spi.readinto(self.buf, FLUSH_TX)
         self.csn(1)
 
-    # power is one of POWER_x defines speed is one of SPEED_x defines
+    # power is one of POWER_x defines; speed is one of SPEED_x defines
     def set_power_speed(self, power, speed):
         setup = self.reg_read(RF_SETUP) & 0b11010001
         self.reg_write(RF_SETUP, setup | power | speed)
@@ -293,8 +228,7 @@ class NRF24L01_2:
         result = None
         while result is None and utime.ticks_diff(utime.ticks_ms(), start) < timeout:
             result = self.send_done()  # 1 == success, 2 == fail
-        if result == 2:
-            raise OSError("send failed")
+        return result
 
     # non-blocking tx
     def send_start(self, buf):
@@ -335,7 +269,7 @@ class NRF24L01_2:
             start_time = utime.ticks_ms()
             timeout = False
             while not self.any() and not timeout:
-                if utime.ticks_diff(utime.ticks_ms(), start_time) > 250:
+                if utime.ticks_diff(utime.ticks_ms(), start_time) > 500:
                     timeout = True
         except OSError:
             pass
@@ -344,6 +278,70 @@ class NRF24L01_2:
         self.open_tx_pipe(pipes[1])
         self.open_rx_pipe(1, pipes[0])
         self.start_listening()
+        while True:
+            if self.any():
+                while self.any():
+                    buf = self.recv()  # 接收内容
+                    data, a = struct.unpack('ii', buf)  # 解析包unpack为解析包函数
+                break
+        return data
+
+    def set_tx_mode(self):
+        # self.open_tx_pipe(pipes[0])
+        address = pipes[0]
+
+        self.reg_write_bytes(RX_ADDR_P0, address)
+        self.reg_write_bytes(TX_ADDR, address)
+        self.reg_write(RX_PW_P0, self.payload_size)
+
+        self.reg_write(EN_RXADDR, self.reg_read(EN_RXADDR) | (1))
+
+        self.reg_write(CONFIG, (self.reg_read(CONFIG) | PWR_UP) & ~PRIM_RX)
+        self.reg_write(STATUS, RX_DR | TX_DS | MAX_RT)
+
+        # self.stop_listening()
+        self.ce(0)
+        self.flush_tx()
+        self.flush_rx()
+
+    def set_rx_mode(self):
+
+        address = pipes[0]
+        self.reg_write_bytes(RX_ADDR_P0, address)
+        # self.reg_write_bytes(TX_ADDR, address)
+        self.reg_write(RX_PW_P0, self.payload_size)
+
+        self.reg_write(EN_RXADDR, self.reg_read(EN_RXADDR) | (1))
+
+        self.reg_write(CONFIG, self.reg_read(CONFIG) | PWR_UP | PRIM_RX)
+        self.reg_write(STATUS, RX_DR | TX_DS | MAX_RT)
+
+        self.flush_rx()
+        self.flush_tx()
+        self.ce(1)
+        utime.sleep_us(130)
+
+    def send_data(self, data):
+        # self.set_tx_mode()
+        # self.ce(0)
+        # self.reg_write(CONFIG, (self.reg_read(CONFIG) | PWR_UP) & ~PRIM_RX)
+        # self.ce(1)
+
+        # self.open_tx_pipe(pipes[0])
+        # self.open_rx_pipe(0, pipes[1])
+        # self.stop_listening()
+
+        result = self.send(struct.pack('i', data))
+        if result == 2:
+            print("send failed:%s" % data)
+
+        # self.start_listening()
+        # self.set_rx_mode()
+        # self.ce(0)
+        # self.reg_write(CONFIG, self.reg_read(CONFIG) | PWR_UP | PRIM_RX)
+        # self.ce(1)
+
+    def recv_data(self):
         while True:
             if self.any():
                 while self.any():

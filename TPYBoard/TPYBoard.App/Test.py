@@ -68,23 +68,25 @@ def Test_NRF24L01():
 
 
 def Test_NRF24L01_2():
-    nrf = NRF24L01_2(spi=2, csn='Y5', ce='Y4', payload_size=32)
+    nrf = NRF24L01_2(spi=2, csn='Y5', ce='Y4', payload_size=16)
 
     def recv():
+        nrf.set_rx_mode()
         while True:
-            s = nrf.slave()
-            # s = nrf.NRF24L01_RxPacket()
+            # s = nrf.slave()
+            s = nrf.recv_data()
             print(">> %s %s" % (s, get_current_time()))
 
     _thread.start_new_thread(recv, ())
 
-    nrf2 = NRF24L01_2(spi=1, csn='X5', ce='X4', payload_size=32)
+    nrf2 = NRF24L01_2(spi=1, csn='X5', ce='X4', payload_size=16)
     i = 0
+    nrf2.set_tx_mode()
     while True:
         i += 1
-        nrf2.master(i)
-        # nrf2.Send_Buf(struct.pack('i', i))
         print("<< %s %s" % (i, get_current_time()))
+        # nrf2.master(i)
+        nrf2.send_data(i)
         time.sleep(3)
 
     while True:
