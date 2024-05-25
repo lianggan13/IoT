@@ -1,0 +1,9 @@
+".\Objects\main.obj",
+".\Objects\NRF24L01.obj",
+".\Objects\test.obj",
+".\Objects\KeyMatrix.obj",
+".\Objects\Led_8x8.obj",
+".\Objects\delay.obj",
+".\Objects\HC595.obj" 
+TO ".\Objects\C51" 
+PRINT(".\Listings\C51.m51")

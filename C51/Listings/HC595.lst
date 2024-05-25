@@ -1,0 +1,76 @@
+C51 COMPILER V9.54   HC595                                                                 05/25/2024 22:21:28 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE HC595
+OBJECT MODULE PLACED IN .\Objects\HC595.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE HC595\HC595.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Li
+                    -stings\HC595.lst) TABS(2) OBJECT(.\Objects\HC595.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2                      单片机IO扩展--74HC595 串行到并行的数据转换                         *
+   3          点阵列控 P0^7~P0^0 - GR1~GR8
+   4          点阵行控 QH~QA - A~H
+   5          ***************************************************************************************/
+   6          
+   7          #include "reg51.h"
+   8          #include "intrins.h"
+   9          #include "HC595.h"
+  10          #include "../Utility/delay.h"
+  11          
+  12          sbit SCK = P3 ^ 6; // 74HC595-11脚 数据移位
+  13          sbit RCK = P3 ^ 5; // 74HC595-12脚 数据存储
+  14          sbit SER = P3 ^ 4; // 74HC595-14脚 串行数据输入
+  15          
+  16          /*******************************************************************************
+  17           * 函 数 名         : Hc595SendByte(unsigned char dat)
+  18           * 函数功能      : 想74H595发送一个字节的数据
+  19           * 输    入         : 无
+  20           * 输    出         : 无
+  21           *******************************************************************************/
+  22          void HC595_WriteByte(unsigned char dat)
+  23          {
+  24   1        unsigned char a;
+  25   1      
+  26   1        SCK = 1;
+  27   1        RCK = 1;
+  28   1      
+  29   1        // 数据移位
+  30   1        for (a = 0; a < 8; a++) // 发送8位数
+  31   1        {
+  32   2          SER = dat >> 7; // 从最高位开始发送
+  33   2          dat <<= 1;
+  34   2      
+  35   2          // 上升沿时数据寄存器的数据移位：QA-->QB-->QC-->...-->QH；
+  36   2          // 下降沿移位寄存器数据不变（脉冲宽度：5V时，保持几十纳秒）
+  37   2          SCK = 0;
+  38   2          _nop_();
+  39   2          _nop_();
+  40   2          SCK = 1;
+  41   2        }
+  42   1      
+  43   1        // 数据存储
+  44   1        // 上升沿时移位寄存器的数据进入数据存储寄存器
+  45   1        // 下降沿时存储寄存器数据不变（脉冲宽度：5V时，保持几十纳秒）
+  46   1        RCK = 0;
+  47   1        _nop_();
+  48   1        _nop_();
+  49   1        RCK = 1;
+  50   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     38    ----
+C51 COMPILER V9.54   HC595                                                                 05/25/2024 22:21:28 PAGE 2   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

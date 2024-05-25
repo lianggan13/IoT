@@ -1,0 +1,177 @@
+C51 COMPILER V9.54   LED_8X8                                                               05/25/2024 22:21:27 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE LED_8X8
+OBJECT MODULE PLACED IN .\Objects\Led_8x8.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE LED\Led_8x8.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Li
+                    -stings\Led_8x8.lst) TABS(2) OBJECT(.\Objects\Led_8x8.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          LED 8x8 点阵
+   3          ***************************************************************************************/
+   4          
+   5          #include "reg51.h"
+   6          #include "intrins.h"
+   7          #include "../Utility/delay.h"
+   8          #include "../HC595/HC595.h"
+   9          #include "Led_8x8.h"
+  10          
+  11          unsigned char code cols[] = {0x7f, 0xbf, 0xdf, 0xef, 0xf7, 0xfb, 0xfd, 0xfe}; // 列选-P0  低电平有�
+             -�
+  12          unsigned char code rows[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80}; // 行选-HC595 高电平有
+             -效
+  13          
+  14          #define ROWS 19
+  15          #define COLS 8
+  16          
+  17          // 点阵字码 (取模工具-参数设置-选项：纵向取模 字节 D7~D0 正序)
+  18          unsigned char code CHARCODE[ROWS][COLS] = {
+  19          
+  20              {0x00, 0x00, 0x3e, 0x41, 0x41, 0x41, 0x3e, 0x00}, // 0
+  21          
+  22              {0x00, 0x00, 0x00, 0x00, 0x21, 0x7f, 0x01, 0x00}, // 1
+  23          
+  24              {0x00, 0x00, 0x27, 0x45, 0x45, 0x45, 0x39, 0x00}, // 2
+  25          
+  26              {0x00, 0x00, 0x22, 0x49, 0x49, 0x49, 0x36, 0x00}, // 3
+  27          
+  28              {0x00, 0x00, 0x0c, 0x14, 0x24, 0x7f, 0x04, 0x00}, // 4
+  29          
+  30              {0x00, 0x00, 0x72, 0x51, 0x51, 0x51, 0x4e, 0x00}, // 5
+  31          
+  32              {0x00, 0x00, 0x3e, 0x49, 0x49, 0x49, 0x26, 0x00}, // 6
+  33          
+  34              {0x00, 0x00, 0x40, 0x40, 0x40, 0x4f, 0x70, 0x00}, // 7
+  35          
+  36              {0x00, 0x00, 0x36, 0x49, 0x49, 0x49, 0x36, 0x00}, // 8
+  37          
+  38              {0x00, 0x00, 0x32, 0x49, 0x49, 0x49, 0x3e, 0x00}, // 9
+  39          
+  40              {0x00, 0x00, 0x7F, 0x48, 0x48, 0x30, 0x00, 0x00}, // P
+  41          
+  42              {0x00, 0x00, 0x7F, 0x48, 0x4C, 0x73, 0x00, 0x00}, // R
+  43          
+  44              {0x00, 0x00, 0x7F, 0x49, 0x49, 0x49, 0x00, 0x00}, // E
+  45          
+  46              {0x00, 0x00, 0x3E, 0x41, 0x41, 0x62, 0x00, 0x00}, // C
+  47          
+  48              {0x00, 0x00, 0x7F, 0x08, 0x08, 0x7F, 0x00, 0x00}, // H
+  49          
+  50              {0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00}, // I
+  51          
+  52              {0x00, 0x7F, 0x10, 0x08, 0x04, 0x7F, 0x00, 0x00}, // N
+C51 COMPILER V9.54   LED_8X8                                                               05/25/2024 22:21:27 PAGE 2   
+
+  53          
+  54              {0x7C, 0x48, 0x48, 0xFF, 0x48, 0x48, 0x7C, 0x00}, // 中
+  55          
+  56              {0x7C, 0x44, 0xFF, 0x45, 0x7D, 0x03, 0x00, 0x00}, // 电
+  57          };
+  58          
+  59          void DisplayZero()
+  60          {
+  61   1          unsigned char i;
+  62   1          P0 = 0x7f;
+  63   1      
+  64   1          while (1)
+  65   1          {
+  66   2              for (i = 0; i < 8; i++)
+  67   2              {
+  68   3                  P0 = cols[i];
+  69   3                  HC595_WriteByte(CHARCODE[0][i]);
+  70   3                  delay_us(1);
+  71   3                  HC595_WriteByte(0x00); // 消隐
+  72   3              }
+  73   2          }
+  74   1      }
+  75          
+  76          void DisplayHV()
+  77          {
+  78   1          unsigned char i, j;
+  79   1          while (1)
+  80   1          {
+  81   2              for (j = 0; j < 3; j++) // 从左到右3次
+  82   2              {
+  83   3                  for (i = 0; i < 8; i++) // 循环8次逐条点亮8个LED点阵灯
+  84   3                  {
+  85   4                      P0 = cols[i];
+  86   4                      HC595_WriteByte(0xff);
+  87   4      
+  88   4                      delay_ms(1000);
+  89   4                      HC595_WriteByte(0x00);
+  90   4                  }
+  91   3              }
+  92   2      
+  93   2              for (j = 0; j < 3; j++) // 从右到左3次
+  94   2              {
+  95   3                  for (i = 0; i < 8; i++) // 循环8次逐条点亮8个LED点阵灯
+  96   3                  {
+  97   4                      P0 = cols[7 - i];
+  98   4                      HC595_WriteByte(0xff);
+  99   4                      delay_ms(1000);
+ 100   4                  }
+ 101   3              }
+ 102   2      
+ 103   2              for (j = 0; j < 3; j++) // 从上到下3次
+ 104   2              {
+ 105   3                  for (i = 0; i < 8; i++) // 循环8次逐条点亮8个LED点阵灯
+ 106   3                  {
+ 107   4                      P0 = 0x00;
+ 108   4                      HC595_WriteByte(rows[7 - i]);
+ 109   4                      delay_ms(1000);
+ 110   4                  }
+ 111   3              }
+ 112   2      
+ 113   2              for (j = 0; j < 3; j++) // 从下到上3次
+ 114   2              {
+C51 COMPILER V9.54   LED_8X8                                                               05/25/2024 22:21:27 PAGE 3   
+
+ 115   3                  for (i = 0; i < 8; i++) // 循环8次逐条点亮8个LED点阵灯
+ 116   3                  {
+ 117   4                      P0 = 0x00;
+ 118   4                      HC595_WriteByte(rows[i]);
+ 119   4                      delay_ms(1000);
+ 120   4                  }
+ 121   3              }
+ 122   2          }
+ 123   1      }
+ 124          
+ 125          void DisplayCodes()
+ 126          {
+ 127   1          unsigned int i, j, a;
+ 128   1      
+ 129   1          while (1)
+ 130   1          {
+ 131   2              for (i = 0; i < ROWS; i++)
+ 132   2              {
+ 133   3                  while (a++ < 500) // 重复执行的时间，即为显示一个字的时间
+ 134   3                  {
+ 135   4                      for (j = 0; j < 8; j++)
+ 136   4                      {
+ 137   5                          P0 = cols[j];
+ 138   5                          HC595_WriteByte(CHARCODE[i][j]);
+ 139   5      
+ 140   5                          delay_us(1);
+ 141   5                          HC595_WriteByte(0x00); // 消隐
+ 142   5                      }
+ 143   4                  }
+ 144   3                  a = 0;
+ 145   3              }
+ 146   2          }
+ 147   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    399    ----
+   CONSTANT SIZE    =    168    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

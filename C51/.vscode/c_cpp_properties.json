@@ -1,0 +1,77 @@
+{
+    "configurations": [
+        {
+            "name": "Target 1",
+            "includePath": [
+                "D:\\App\\Keil_v5\\C51\\INC",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Program",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\NRF24L01",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Test"
+            ],
+            "defines": [
+                "__C51__",
+                "__VSCODE_C51__",
+                "reentrant=",
+                "compact=",
+                "small=",
+                "large=",
+                "data=",
+                "idata=",
+                "pdata=",
+                "bdata=",
+                "xdata=",
+                "code=",
+                "bit=char",
+                "sbit=char",
+                "sfr=char",
+                "sfr16=int",
+                "sfr32=int",
+                "interrupt=",
+                "using=",
+                "_at_=",
+                "_priority_=",
+                "_task_="
+            ],
+            "intelliSenseMode": "${default}"
+        },
+        {
+            "name": "AT89C51",
+            "includePath": [
+                "D:\\App\\Keil_v5\\C51\\INC",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Program",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\NRF24L01",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Test",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Keyboard",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\LED",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Utility",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\HC595"
+            ],
+            "defines": [
+                "__C51__",
+                "__VSCODE_C51__",
+                "reentrant=",
+                "compact=",
+                "small=",
+                "large=",
+                "data=",
+                "idata=",
+                "pdata=",
+                "bdata=",
+                "xdata=",
+                "code=",
+                "bit=char",
+                "sbit=char",
+                "sfr=char",
+                "sfr16=int",
+                "sfr32=int",
+                "interrupt=",
+                "using=",
+                "_at_=",
+                "_priority_=",
+                "_task_="
+            ],
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}
