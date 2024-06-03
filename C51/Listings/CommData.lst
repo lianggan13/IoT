@@ -1,0 +1,30 @@
+C51 COMPILER V9.54   COMMDATA                                                              06/03/2024 10:36:15 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE COMMDATA
+OBJECT MODULE PLACED IN .\Objects\CommData.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE Utility\CommData.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+                    - PRINT(.\Listings\CommData.lst) TABS(2) OBJECT(.\Objects\CommData.obj)
+
+line level    source
+
+   1          
+   2          #include <reg51.h>
+   3          #include "CommData.h"
+   4          
+   5          unsigned char code smgduan[17] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07,
+   6                                             0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71}; // 显示0~F的值
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =     17    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

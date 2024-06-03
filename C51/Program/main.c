@@ -6,9 +6,11 @@
 #include "../NRF24L01/NRF24L01.h"
 #include "../Keyboard/KeyMatrix.h"
 #include "../Led/Led_8x8.h"
+#include "../Interrupt/Interrupt.h"
+#include "../ROM/EEPROM.h"
+#include "../Temp/DS18B20.h"
 
 // TODO List:
-// 4.中断(外部、定时器)、
 // Proteus https://zhuanlan.zhihu.com/p/655950841
 // Altium Designer
 
@@ -48,5 +50,10 @@ void main()
 
 	// DisplayZero();
 	// DisplayHV();
-	DisplayCodes();
+	// DisplayCodes();
+
+	// TestTF1();
+	// TestEEPROM();
+
+	TestDS18B20();
 }

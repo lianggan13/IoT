@@ -11,6 +11,13 @@
         "reg51.h": "c",
         "REG51.H": "cpp",
         "hc595.h": "c",
-        "led_8x8.h": "c"
+        "led_8x8.h": "c",
+        "commdata.h": "c",
+        "i2c.h": "c",
+        "interrupt.h": "c",
+        "eeprom.h": "c",
+        "utility": "c",
+        "ds18b20.h": "c",
+        "dynamicled.h": "c"
     }
 }

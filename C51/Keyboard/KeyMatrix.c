@@ -11,15 +11,13 @@
 #include "reg52.h" //此文件中定义了单片机的一些特殊功能寄存器
 #include "KeyMatrix.h"
 #include "../Utility/delay.h"
+#include "../Utility/CommData.h"
 
 typedef unsigned int u16; // 对数据类型进行声明定义
 typedef unsigned char u8;
 
 #define GPIO_DIG P0 // P0^7_P0^0 - ~ ABCDEFG
 #define GPIO_KEY P1 // P1^7_P1^0 - C0C1C2C3K0K1K2K3
-
-u8 code smgduan[17] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07,
-                       0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71}; // 显示0~F的值
 
 /*******************************************************************************
  行列扫描按键

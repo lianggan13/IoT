@@ -44,7 +44,10 @@
                 "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Keyboard",
                 "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\LED",
                 "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Utility",
-                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\HC595"
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\HC595",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Interrupt",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\ROM",
+                "d:\\KSS\\Software\\IoT\\Code\\IoT\\C51\\Temp"
             ],
             "defines": [
                 "__C51__",
