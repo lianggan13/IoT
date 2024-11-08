@@ -500,3 +500,4 @@ healthchecksdb
 *.swp             # Swap files created by editors
 
 **/.vscode/
+
