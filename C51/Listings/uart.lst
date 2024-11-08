@@ -1,0 +1,133 @@
+C51 COMPILER V9.54   UART                                                                  07/06/2024 19:17:15 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN .\Objects\uart.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE UART\uart.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(
+                    -.\Listings\uart.lst) TABS(2) OBJECT(.\Objects\uart.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          *                 串口通信实验                          *
+   3          实现现象：下载程序后打开串口调试助手，将波特率设置为4800，选择发送的数据
+             -就可以显示
+   4                      在串口助手上。具体操作参考操作视频
+   5          注意事项：无。
+   6          
+   7              VCC--5V
+   8              RXD--P3.1 (TXD)
+   9              TXD--P3.0 (RXD)
+  10              GND--GND
+  11          ***************************************************************************************/
+  12          
+  13          #include "reg52.h" //此文件中定义了单片机的一些特殊功能寄存器
+  14          #include "uart.h"
+  15          
+  16          #define FOSC 11059200 // 单片机晶振频率
+  17          #define BAUD 4800     // 波特率设置为9600
+  18          
+  19          typedef unsigned int u16; // 对数据类型进行声明定义
+  20          typedef unsigned char u8;
+  21          
+  22          void UsartInit01()
+  23          {
+  24   1          // 设定串行口的工作方式、接收/发送控制以及设置状态标志
+  25   1          // SM0和SM1为工作方式选择位，可选择四种工作方式: 方式1 10位异步收发器(8bit�
+             -��据)
+  26   1          // SM2，多机通信控制位
+  27   1          // REN，允许串行接收位
+  28   1          // TB8，在方式2或方式3中，是发送数据的第九位
+  29   1          // RB8，在方式2或方式3中，是接收到数据的第九位
+  30   1          // TI，发送中断标志位。
+  31   1          // RI，接收中断标志位
+  32   1          SCON = 0X50; // 设置为模式1，8位数据，可变波特率
+  33   1      
+  34   1          // 串口设置9600波特率的时候总是接收不到正确数据
+  35   1          // 因为12Mhz的单片机9600波特通信设置T1初值为FD时有8.51%的误差，而允许误差为
+             -4.5%以下
+  36   1          // 解决方法：用4800波特率，置SMOD为1通信，此时误差只有0.16%
+  37   1          TMOD = 0X20; // 设置计数器T1工作方式2 自动重装载
+  38   1          // TH1 = 0XF3;  // 计数器初始值设置，0XF3 x2:4800
+  39   1          // TL1 = 0XF3;
+  40   1      
+  41   1          TH1 = 0XF9; // 计数器初始值设置，0XF3 x2:4800
+  42   1          TL1 = 0XF9;
+  43   1      
+  44   1          // SMOD（PCON.7）  波特率倍增位。在串行口方式1、方式2、方式3时，波特率与SMO
+             -D有关，当SMOD=1时，波特率提高一倍
+  45   1          PCON = 0X80; // 波特率加倍 x2
+  46   1      
+  47   1          ES = 1;  // 打开接收串口中断
+  48   1          EA = 1;  // 打开总中断
+  49   1          TR1 = 1; // 打开计数器
+  50   1      }
+C51 COMPILER V9.54   UART                                                                  07/06/2024 19:17:15 PAGE 2   
+
+  51          
+  52          void UsartInit02()
+  53          {
+  54   1          SCON = 0x50; // 串口配置为工作方式1
+  55   1          PCON = 0;    // 波特率不加倍
+  56   1      
+  57   1          TMOD = 0x20;                             // 设置定时器1为8位自动重装模式
+  58   1          TH1 = TL1 = 256 - FOSC / 32 / 12 / BAUD; // 定时器1赋初始值
+  59   1      
+  60   1          ET1 = 0; // 禁止定时器1中断
+  61   1          TR1 = 1; // 启动定时器1
+  62   1      
+  63   1          ES = 1; // 允许串口中断
+  64   1      }
+  65          
+  66          // void Usart() interrupt 4
+  67          // {
+  68          //     u8 receiveData;
+  69          
+  70          //     receiveData = SBUF; // 出去接收到的数据
+  71          //     RI = 0;             // 串行接收停止位的中间时，由内部硬件使RI置1，向CPU发中�
+             -��申请。也必须在中断服务程序中，用软件将其清0，取消此中断申请
+  72          //     SBUF = receiveData; // 将接收到的数据放入到发送寄存器
+  73          //     while (!TI)
+  74          //         ;   // 等待发送数据完成
+  75          //     TI = 0; // 串行发送停止位的开始时，由内部硬件使TI置1，向CPU发中断申请。�
+             -��中断服务程序中，必须用软件将其清0，取消此中断申请。
+  76          // }
+  77          
+  78          // 串口接收中断服务程序
+  79          void UART_ISR() interrupt 4
+  80          {
+  81   1          if (RI)
+  82   1          {
+  83   2              u8 receiveData = SBUF;
+  84   2      
+  85   2              RI = 0; // 清除接收中断标志
+  86   2      
+  87   2              SBUF = receiveData;
+  88   2              while (!TI)
+  89   2                  ; // 等待发送数据完成
+  90   2              TI = 0;
+  91   2          }
+  92   1      }
+  93          
+  94          void TestUART()
+  95          {
+  96   1          UsartInit01();
+  97   1          while (1)
+  98   1              ;
+  99   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     81    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.54   UART                                                                  07/06/2024 19:17:15 PAGE 3   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

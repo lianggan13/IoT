@@ -1,0 +1,130 @@
+C51 COMPILER V9.54   XPT2046                                                               07/03/2024 22:49:23 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE XPT2046
+OBJECT MODULE PLACED IN .\Objects\XPT2046.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE ADC\XPT2046.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRIN
+                    -T(.\Listings\XPT2046.lst) TABS(2) OBJECT(.\Objects\XPT2046.obj)
+
+line level    source
+
+   1          
+   2          #include "reg52.h"
+   3          #include <intrins.h>
+   4          #include "XPT2046.h"
+   5          #include "../Utility/CommData.h"
+   6          #include "../LED/DynamicLed.h"
+   7          #include "../Utility/delay.h"
+   8          
+   9          typedef unsigned int u16; // 对数据类型进行声明定义
+  10          typedef unsigned char u8;
+  11          
+  12          sbit DOUT = P3 ^ 7; // 输出
+  13          sbit CLK = P3 ^ 6;  // 时钟
+  14          sbit DIN = P3 ^ 4;  // 输入
+  15          sbit CS = P3 ^ 5; // 片选
+  16          
+  17          void SPI_Write(unsigned char dat)
+  18          {
+  19   1        unsigned char i;
+  20   1        CLK = 0;
+  21   1        for (i = 0; i < 8; i++)
+  22   1        {
+  23   2          DIN = dat >> 7; // 放置最高位
+  24   2          dat <<= 1;    // 左移: 最高位移走 次高位变最高位
+  25   2          CLK = 0;    // 上升沿放置数据
+  26   2      
+  27   2          CLK = 1;
+  28   2        }
+  29   1      }
+  30          
+  31          unsigned int SPI_Read(void)
+  32          {
+  33   1        unsigned int i, dat = 0;
+  34   1        CLK = 0;
+  35   1        for (i = 0; i < 12; i++) // 接收12位数据
+  36   1        {
+  37   2          dat <<= 1;
+  38   2      
+  39   2          CLK = 1;
+  40   2          CLK = 0;
+  41   2      
+  42   2          dat |= DOUT;
+  43   2        }
+  44   1        return dat;
+  45   1      }
+  46          
+  47          /****************************************************************************
+  48           *函数名：Read_AD_Data
+  49           *输  入：cmd：读取的X或者Y
+  50           *输  出：endValue：最终信号处理后返回的值
+  51           *功  能：读取触摸数据
+  52           ****************************************************************************/
+  53          unsigned int Read_AD_Data(unsigned char cmd)
+  54          {
+C51 COMPILER V9.54   XPT2046                                                               07/03/2024 22:49:23 PAGE 2   
+
+  55   1        unsigned char i;
+  56   1        unsigned int AD_Value;
+  57   1        CLK = 0;
+  58   1        CS = 0;
+  59   1        SPI_Write(cmd);
+  60   1        for (i = 6; i > 0; i--)
+  61   1          ;  // 延时等待转换结果
+  62   1        CLK = 1; // 发送一个时钟周期，清除BUSY
+  63   1        _nop_();
+  64   1        _nop_();
+  65   1        CLK = 0;
+  66   1        _nop_();
+  67   1        _nop_();
+  68   1        AD_Value = SPI_Read();
+  69   1        CS = 1;
+  70   1        return AD_Value;
+  71   1      }
+  72          
+  73          void datapros01()
+  74          {
+  75   1        u16 temp;
+  76   1        static u8 i;
+  77   1        if (i == 50)
+  78   1        {
+  79   2          i = 0;
+  80   2          // 控制字
+  81   2          // AIN0 X+   电位器      0X94
+  82   2          // AIN1 Y+   热敏电阻    0XD4
+  83   2          // AIN2 VBAT 光敏电阻    0XA4
+  84   2          // AIN3 AUX  外部输入    0XE4
+  85   2          temp = Read_AD_Data(0x94); //   AIN0 电位器
+  86   2                         // temp = Read_AD_Data(0xD4); //   AIN1 热敏电阻
+  87   2                         // temp = Read_AD_Data(0xA4); //   AIN2 光敏电阻
+  88   2                         // temp = Read_AD_Data(0xE4); //   AIN3 外部输入
+  89   2        }
+  90   1        i++;
+  91   1        DisplayData[0] = smgduan[temp / 1000];        // 千位
+  92   1        DisplayData[1] = smgduan[temp % 1000 / 100];    // 百位
+  93   1        DisplayData[2] = smgduan[temp % 1000 % 100 / 10]; // 个位
+  94   1        DisplayData[3] = smgduan[temp % 1000 % 100 % 10];
+  95   1      }
+  96          
+  97          void TestXPT2046()
+  98          {
+  99   1        while (1)
+ 100   1        {
+ 101   2          datapros01(); // 数据处理函数
+ 102   2          DigDisplay(); // 数码管显示函数
+ 103   2        }
+ 104   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    319    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      1       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,211 @@
+C51 COMPILER V9.54   DS1302                                                                07/03/2024 22:49:23 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE DS1302
+OBJECT MODULE PLACED IN .\Objects\ds1302.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE Clock\ds1302.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRI
+                    -NT(.\Listings\ds1302.lst) TABS(2) OBJECT(.\Objects\ds1302.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          *                 DS1302时钟实验                          *
+   3          注意事项：  注意将时钟模块的JP1302短接片短接，
+   4                74HC595模块的短接片JP595拔掉，
+   5                NE555模块的短接片J11拔掉。
+   6          ***************************************************************************************/
+   7          
+   8          #include <reg52.h>
+   9          #include <intrins.h>
+  10          #include "ds1302.h"
+  11          #include "../Utility/CommData.h"
+  12          #include "../LED/DynamicLed.h"
+  13          
+  14          //---定义ds1302使用的IO口---//
+  15          sbit DSIO = P3 ^ 4;
+  16          sbit RST = P3 ^ 5;
+  17          sbit SCLK = P3 ^ 6;
+  18          
+  19          // 地址寄存器格式:
+  20          // D7 1
+  21          // D6 RAM/_CK =1片内RAM，=0日历、时钟寄存器选择位
+  22          // D5 ~ D1 地址位
+  23          // D0 RD/_W 读写选择，=1读，=0写
+  24          
+  25          //---DS1302写入和读取时分秒的地址命令---//
+  26          //---秒 分 时(24时制作) 日 月 周 年 (最低位读写位);-------//
+  27          unsigned char code READ_RTC_ADDR[7] = {0x81, 0x83, 0x85, 0x87, 0x89, 0x8b, 0x8d};  // 读地址
+  28          unsigned char code WRITE_RTC_ADDR[7] = {0x80, 0x82, 0x84, 0x86, 0x88, 0x8a, 0x8c}; // 写地址
+  29          
+  30          //---DS1302时钟初始化2016年5月7日星期六12点00分00秒。---//
+  31          //---存储顺序：秒 分 时 日 月 周 年 （存储格式 BCD码)---//
+  32          unsigned char TIME[7] = {0, 0, 0x12, 0x07, 0x05, 0x06, 0x16};
+  33          
+  34          /*******************************************************************************
+  35           * 函 数 名         : Ds1302Write
+  36           * 函数功能      : 向DS1302命令（地址+数据）
+  37           * 输    入         : addr,dat
+  38           * 输    出         : 无
+  39           *******************************************************************************/
+  40          
+  41          void Ds1302Write(unsigned char addr, unsigned char dat)
+  42          {
+  43   1        unsigned char n;
+  44   1        RST = 0;
+  45   1        _nop_();
+  46   1      
+  47   1        SCLK = 0; // 先将SCLK置低电平。
+  48   1        _nop_();
+  49   1        RST = 1; // 然后将RST(CE)置高电平。
+  50   1        _nop_();
+  51   1      
+  52   1        for (n = 0; n < 8; n++) // 开始传送八位地址命令
+  53   1        {
+  54   2          DSIO = addr & 0x01; // 数据从低位开始传送
+C51 COMPILER V9.54   DS1302                                                                07/03/2024 22:49:23 PAGE 2   
+
+  55   2          addr >>= 1;
+  56   2          SCLK = 1; // 数据在上升沿时，DS1302读取数据
+  57   2          _nop_();
+  58   2          SCLK = 0;
+  59   2          _nop_();
+  60   2        }
+  61   1        for (n = 0; n < 8; n++) // 写入8位数据
+  62   1        {
+  63   2          DSIO = dat & 0x01;
+  64   2          dat >>= 1;
+  65   2          SCLK = 1; // 数据在上升沿时，DS1302读取数据
+  66   2          _nop_();
+  67   2          SCLK = 0;
+  68   2          _nop_();
+  69   2        }
+  70   1      
+  71   1        RST = 0; // 传送数据结束
+  72   1        _nop_();
+  73   1      }
+  74          
+  75          /*******************************************************************************
+  76           * 函 数 名         : Ds1302Read
+  77           * 函数功能      : 读取一个地址的数据
+  78           * 输    入         : addr
+  79           * 输    出         : dat
+  80           *******************************************************************************/
+  81          
+  82          unsigned char Ds1302Read(unsigned char addr)
+  83          {
+  84   1        unsigned char n, dat, dat1;
+  85   1        RST = 0;
+  86   1        _nop_();
+  87   1      
+  88   1        SCLK = 0; // 先将SCLK置低电平。
+  89   1        _nop_();
+  90   1        RST = 1; // 然后将RST(CE)置高电平。
+  91   1        _nop_();
+  92   1      
+  93   1        for (n = 0; n < 8; n++) // 开始传送八位地址命令
+  94   1        {
+  95   2          DSIO = addr & 0x01; // 数据从低位开始传送
+  96   2          addr >>= 1;
+  97   2          SCLK = 1; // 数据在上升沿时，DS1302读取数据
+  98   2          _nop_();
+  99   2          SCLK = 0; // DS1302下降沿时，放置数据
+ 100   2          _nop_();
+ 101   2        }
+ 102   1        _nop_();
+ 103   1        for (n = 0; n < 8; n++) // 读取8位数据
+ 104   1        {
+ 105   2          dat1 = DSIO; // 从最低位开始接收
+ 106   2          dat = (dat >> 1) | (dat1 << 7);
+ 107   2          SCLK = 1;
+ 108   2          _nop_();
+ 109   2          SCLK = 0; // DS1302下降沿时，放置数据
+ 110   2          _nop_();
+ 111   2        }
+ 112   1      
+ 113   1        RST = 0;
+ 114   1        _nop_(); // 以下为DS1302复位的稳定时间,必须的。
+ 115   1        SCLK = 1;
+ 116   1        _nop_();
+C51 COMPILER V9.54   DS1302                                                                07/03/2024 22:49:23 PAGE 3   
+
+ 117   1        DSIO = 0;
+ 118   1        _nop_();
+ 119   1        DSIO = 1;
+ 120   1        _nop_();
+ 121   1        return dat;
+ 122   1      }
+ 123          
+ 124          /*******************************************************************************
+ 125           * 函 数 名         : Ds1302Init
+ 126           * 函数功能      : 初始化DS1302.
+ 127           * 输    入         : 无
+ 128           * 输    出         : 无
+ 129           *******************************************************************************/
+ 130          
+ 131          void Ds1302Init()
+ 132          {
+ 133   1        unsigned char n;
+ 134   1        //
+ 135   1        Ds1302Write(0x8E, 0X00); // 禁止写保护，就是关闭写保护功能 写地址:0x8E 值: 0x00
+ 136   1        for (n = 0; n < 7; n++)  // 写入7个字节的时钟信号：分秒时日月周年
+ 137   1        {
+ 138   2          Ds1302Write(WRITE_RTC_ADDR[n], TIME[n]);
+ 139   2        }
+ 140   1        Ds1302Write(0x8E, 0x80); // 打开写保护功能
+ 141   1      }
+ 142          
+ 143          /*******************************************************************************
+ 144           * 函 数 名         : Ds1302ReadTime
+ 145           * 函数功能      : 读取时钟信息
+ 146           * 输    入         : 无
+ 147           * 输    出         : 无
+ 148           *******************************************************************************/
+ 149          
+ 150          void Ds1302ReadTime()
+ 151          {
+ 152   1        unsigned char n;
+ 153   1        for (n = 0; n < 7; n++) // 读取7个字节的时钟信号：分秒时日月周年
+ 154   1        {
+ 155   2          TIME[n] = Ds1302Read(READ_RTC_ADDR[n]);
+ 156   2        }
+ 157   1      }
+ 158          
+ 159          void SetDateTime()
+ 160          {
+ 161   1        Ds1302ReadTime();
+ 162   1        // DisplayData[0] = smgduan[TIME[2]/16];  //时
+ 163   1        DisplayData[0] = smgduan[TIME[2] & 0xf0]; // 时
+ 164   1        DisplayData[1] = smgduan[TIME[2] & 0x0f];
+ 165   1        DisplayData[2] = 0x40;
+ 166   1        DisplayData[3] = smgduan[TIME[1] / 16]; // 分
+ 167   1        DisplayData[4] = smgduan[TIME[1] & 0x0f];
+ 168   1        DisplayData[5] = 0x40;
+ 169   1        DisplayData[6] = smgduan[TIME[0] / 16]; // 秒
+ 170   1        DisplayData[7] = smgduan[TIME[0] & 0x0f];
+ 171   1      }
+ 172          
+ 173          void TestDS1302()
+ 174          {
+ 175   1        Ds1302Init();
+ 176   1        while (1)
+ 177   1        {
+ 178   2          SetDateTime(); // 数据处理函数
+C51 COMPILER V9.54   DS1302                                                                07/03/2024 22:49:23 PAGE 4   
+
+ 179   2          DigDisplay();  // 数码管显示函数
+ 180   2        }
+ 181   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    305    ----
+   CONSTANT SIZE    =     14    ----
+   XDATA SIZE       =      7    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

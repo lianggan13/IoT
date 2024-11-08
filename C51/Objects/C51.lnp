@@ -1,0 +1,21 @@
+".\Objects\main.obj",
+".\Objects\NRF24L01.obj",
+".\Objects\test.obj",
+".\Objects\KeyMatrix.obj",
+".\Objects\Led_8x8.obj",
+".\Objects\DynamicLed.obj",
+".\Objects\delay.obj",
+".\Objects\CommData.obj",
+".\Objects\HC595.obj",
+".\Objects\Interrupt.obj",
+".\Objects\I2C.obj",
+".\Objects\EEPROM.obj",
+".\Objects\DS18B20.obj",
+".\Objects\ds1302.obj",
+".\Objects\ir.obj",
+".\Objects\XPT2046.obj",
+".\Objects\pwm.obj",
+".\Objects\LCD1602.obj",
+".\Objects\uart.obj" 
+TO ".\Objects\C51" 
+PRINT(".\Listings\C51.m51")

@@ -1,0 +1,71 @@
+C51 COMPILER V9.54   MAIN                                                                  07/03/2024 22:51:08 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE Program\main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRI
+                    -NT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          #include <reg52.h>
+   3          // #include "../NRF24L01/NRF24L01.h"
+   4          // #include "../Interrupt/Interrupt.h"
+   5          // #include "../ROM/EEPROM.h"
+   6          // #include "../Temp/DS18B20.h"
+   7          // #include "../Clock/ds1302.h"
+   8          // #include "../IR/ir.h"
+   9          // #include "../ADC/XPT2046.h"
+  10          // #include "../DAC/pwm.h"
+  11          // #include "../LCD/LCD1602.h"
+  12          #include "../UART/uart.h"
+  13          
+  14          
+  15          // TODO List:
+  16          // Proteus https://zhuanlan.zhihu.com/p/655950841
+  17          // Altium Designer
+  18          
+  19          void main()
+  20          {
+  21   1        // TestNRF24L01();
+  22   1        // TestKeyMatrix();
+  23   1        // TestNRF24L01_Key();
+  24   1      
+  25   1        // DisplayZero();
+  26   1        // DisplayHV();
+  27   1        // DisplayCodes();
+  28   1      
+  29   1        // TestTF1();
+  30   1        // TestEEPROM();
+  31   1      
+  32   1        // TestDS18B20();
+  33   1      
+  34   1        // TestDS1302();
+  35   1      
+  36   1        // TestIR();
+  37   1      
+  38   1        // TestXPT2046();
+  39   1      
+  40   1        // TestPWM();
+  41   1      
+  42   1        // TestLCD1602();
+  43   1      
+  44   1        TestUART();
+  45   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      3    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V9.54   MAIN                                                                  07/03/2024 22:51:08 PAGE 2   
+
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

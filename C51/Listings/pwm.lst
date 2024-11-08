@@ -1,0 +1,118 @@
+C51 COMPILER V9.54   PWM                                                                   07/03/2024 22:49:23 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN .\Objects\pwm.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE DAC\pwm.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\
+                    -Listings\pwm.lst) TABS(2) OBJECT(.\Objects\pwm.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          *                 DA-PWM                          *
+   3          用定时器来固定周期长度，用定时器确定时间
+   4                T = (0.05s = 50ms = 50000us) x 50 次 = 2.5s
+   5                20% 00~10次 0.5s 高电平
+   6                80% 10~50次 2.0s 低电平
+   7          ***************************************************************************************/
+   8          
+   9          #include "reg52.h"
+  10          #include "pwm.h"
+  11          
+  12          #define uchar unsigned char;
+  13          
+  14          sbit PWM = P2 ^ 1;
+  15          bit DIR;
+  16          
+  17          uchar T = 1000;   // 周期
+  18          uchar t0 = 0;   // 定时器累加
+  19          uchar sample = 0; // 调节占空比 采样
+  20          uchar C;      // 占空比
+  21          
+  22          void SetTimerCount()
+  23          {
+  24   1        // 2^16 50ms == 0.05s
+  25   1        // TH0 = (65536 - 50000) / 256;
+  26   1        // TL0 = (65536 - 50000) % 256;
+  27   1      
+  28   1        // 1us
+  29   1        TH0 = 0xFF;
+  30   1        TL0 = 0xff;
+  31   1      }
+  32          
+  33          void Timer0Init_PWM()
+  34          {
+  35   1        TMOD |= 0X01; // GATE CT M1 M0 GATE CT M1 M0
+  36   1        SetTimerCount();
+  37   1        EA = 1;
+  38   1        ET0 = 1;
+  39   1        TR0 = 1;
+  40   1      }
+  41          
+  42          
+  43          void Time0Interrupt(void) interrupt 1 // 3 为定时器1的中断号  1 定时器0的中断号 0 外部中断1 2 外部中断2  4
+             - 串口中断
+  44          {
+  45   1        SetTimerCount();
+  46   1        t0++;
+  47   1        sample++;
+  48   1      }
+  49          
+  50          void TestPWM()
+  51          {
+  52   1        Timer0Init_PWM();
+  53   1        while (1)
+C51 COMPILER V9.54   PWM                                                                   07/03/2024 22:49:23 PAGE 2   
+
+  54   1        {
+  55   2          if (sample > (T / 10))
+  56   2          {
+  57   3            sample = 0;
+  58   3            if (DIR == 1)
+  59   3            {
+  60   4              C++;
+  61   4            }
+  62   3            if (DIR == 0)
+  63   3            {
+  64   4              C--;
+  65   4            }
+  66   3          }
+  67   2      
+  68   2          if (C == T)
+  69   2          {
+  70   3            DIR = 0;
+  71   3          }
+  72   2          if (C == 0)
+  73   2          {
+  74   3            DIR = 1;
+  75   3          }
+  76   2      
+  77   2          if (t0 > T)
+  78   2          {
+  79   3            t0 = 0;
+  80   3          }
+  81   2      
+  82   2          if (t0 < C)
+  83   2          {
+  84   3            PWM = 1; // 灯亮
+  85   3          }
+  86   2          else
+  87   2          {
+  88   3            PWM = 0; // 灯灭
+  89   3          }
+  90   2        }
+  91   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    233    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      8    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

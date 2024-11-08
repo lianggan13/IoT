@@ -1,0 +1,117 @@
+C51 COMPILER V9.54   KEYMATRIX                                                             07/03/2024 22:49:22 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE KEYMATRIX
+OBJECT MODULE PLACED IN .\Objects\KeyMatrix.obj
+COMPILER INVOKED BY: D:\App\Keil_v5\C51\BIN\C51.EXE Keyboard\KeyMatrix.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTE
+                    -ND PRINT(.\Listings\KeyMatrix.lst) TABS(2) OBJECT(.\Objects\KeyMatrix.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          *                 矩阵按键实验                          *
+   3          实现现象：下载程序后数码管显示0，按下矩阵按键上的按键显示对应的数字
+   4                      S1-S4：0-3
+   5                      S5-S8：4-7
+   6                      S9-S12：8-B
+   7                      S13-S16：C-F。
+   8          注意事项：
+   9          ***************************************************************************************/
+  10          
+  11          #include "reg52.h" //此文件中定义了单片机的一些特殊功能寄存器
+  12          #include "KeyMatrix.h"
+  13          #include "../Utility/delay.h"
+  14          #include "../Utility/CommData.h"
+  15          
+  16          typedef unsigned int u16; // 对数据类型进行声明定义
+  17          typedef unsigned char u8;
+  18          
+  19          #define GPIO_DIG P0 // P0^7_P0^0 - ~ ABCDEFG
+  20          #define GPIO_KEY P1 // P1^7_P1^0 - C0C1C2C3K0K1K2K3
+  21          
+  22          /*******************************************************************************
+  23           行列扫描按键
+  24           行：高4位 列：低4位
+  25           高4位为0，低4位为1 0x0F(0b00001111) -> 高4位为1，低4位为0 0xF0(0b11110000)
+  26           *******************************************************************************/
+  27          int CheckKeyDown()
+  28          {
+  29   1          char a = 0;
+  30   1          int Key = -1; // 用来存放读取到的键值
+  31   1          GPIO_KEY = 0x0F;
+  32   1          if (GPIO_KEY != 0x0F) // 读取按键是否按下
+  33   1          {
+  34   2              delay_ms(10);         // 延时10ms进行消抖
+  35   2              if (GPIO_KEY != 0x0f) // 再次检测键盘是否按下
+  36   2              {
+  37   3                  // 确定按键所在列
+  38   3                  // GPIO_KEY = 0X0F;
+  39   3                  switch (GPIO_KEY)
+  40   3                  {
+  41   4                  case (0X07):
+  42   4                      Key = 0;
+  43   4                      break;
+  44   4                  case (0X0b):
+  45   4                      Key = 1;
+  46   4                      break;
+  47   4                  case (0X0d):
+  48   4                      Key = 2;
+  49   4                      break;
+  50   4                  case (0X0e):
+  51   4                      Key = 3;
+  52   4                      break;
+  53   4                  }
+  54   3                  // 确定按键所在列行
+C51 COMPILER V9.54   KEYMATRIX                                                             07/03/2024 22:49:22 PAGE 2   
+
+  55   3                  GPIO_KEY = 0XF0;
+  56   3                  switch (GPIO_KEY)
+  57   3                  {
+  58   4                  case (0X70):
+  59   4                      Key = Key;
+  60   4                      break;
+  61   4                  case (0Xb0):
+  62   4                      Key = Key + 4;
+  63   4                      break;
+  64   4                  case (0Xd0):
+  65   4                      Key = Key + 8;
+  66   4                      break;
+  67   4                  case (0Xe0):
+  68   4                      Key = Key + 12;
+  69   4                      break;
+  70   4                  }
+  71   3                  // 检测按键松手检测
+  72   3                  // while ((a < 50) && (GPIO_KEY != 0XF0))
+  73   3                  // {
+  74   3                  //     delay_ms(10);
+  75   3                  //     a++; // 如果按键一直按下，超过 50*10ms，就强制退出，保证程序继�
+             -�执行
+  76   3                  // }
+  77   3              }
+  78   2          }
+  79   1          return Key;
+  80   1      }
+  81          
+  82          void TestKeyMatrix()
+  83          {
+  84   1      
+  85   1          while (1)
+  86   1          {
+  87   2              unsigned char Key = CheckKeyDown();
+  88   2              GPIO_DIG = ~smgduan[Key];
+  89   2          }
+  90   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    190    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
