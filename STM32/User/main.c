@@ -39,12 +39,13 @@ void ClearArray(uint8_t *array, size_t size)
 
 void DataReceivedHandler(uint8_t *data, uint16_t length)
 {
-	USART3_SendString(data, length);
+	// USART3_SendString(data, length);
 
 	uint8_t NRF_Buf[TX_PLOAD_WIDTH] = {0};
 	NRF_Buf[0] = length;
 	AppendByteArray(NRF_Buf, sizeof(NRF_Buf), data, length);
 	NRF24L01_TxHalfDuplex(NRF_Buf, 0xFF);
+	
 }
 
 int main(void)
@@ -67,7 +68,7 @@ int main(void)
 			if (!NRF24L01_RxPacket(NRF_Buf))
 			{
 				NRF24L01_TxHalfDuplex(NRF_Buf, 0xFF);
-
+				
 				size_t NRF_Len = NRF_Buf[0];
 
 				if (NRF_Len == 2)

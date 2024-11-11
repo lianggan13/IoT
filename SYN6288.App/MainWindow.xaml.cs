@@ -2,7 +2,7 @@
 using System.IO.Ports;
 using System.Windows;
 
-namespace NRF24L01.App
+namespace SYN6288.App
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -75,7 +75,7 @@ namespace NRF24L01.App
             }
         }
 
-        private NAPort serial;
+        private NRF_Serial serial;
         private List<byte[]> blocks = new List<byte[]>();
 
         public MainWindow()
@@ -88,16 +88,18 @@ namespace NRF24L01.App
             foreach (string port in SerialPort.GetPortNames())
                 cmbPorts.Items.Add(port);
 
-            serial = new NAPort();
+
+            serial = new NRF_Serial();
             serial.Received += Serial_Received;
         }
 
         private void Serial_Received(byte[] buffer)
         {
-            var recvText = NAPort.GBK.GetString(buffer);
+            var recvText = NRF_Serial.GBK.GetString(buffer);
             AddInfo($">> {recvText} {string.Join(" ", buffer.Select(b => $"0x{b:X2}"))}");
 
-            var oldBlock = blocks.FirstOrDefault(b => b.SequenceEqual(buffer));
+            var oldBlock = blocks.FirstOrDefault(b => b.SequenceEqual(buffer)
+                                                    || !b.Except(buffer).Any());
             if (oldBlock != null)
                 blocks.Remove(oldBlock);
 
@@ -119,14 +121,14 @@ namespace NRF24L01.App
             // [2]:控制标记后的2个汉字强制读成“两字词”
             // [3]:控制标记后的3个汉字强制读成“三字词”
 
-            var m = int.Parse(numForeVol.Text);
-            var v = int.Parse(numBakVol.Text);
+            var m = int.Parse(numBakVol.Text);
+            var v = int.Parse(numForeVol.Text);
             var t = int.Parse(numSpeed.Text);
             var o = !(bool)togStyle.IsChecked ? 0 : 1;
 
             var prefix = $"[v{v}][m{m}][t{t}][o{o}][n1]"; //  "[v7][m1][t5][o0]"
             txt = $"{prefix}{txt}";
-            var buffer = NAPort.GBK.GetBytes(txt);
+            var buffer = NRF_Serial.GBK.GetBytes(txt);
 
             var len = buffer.Length;
             var DATA_WIDTH = TX_PLOAD_WIDTH - 1;
@@ -164,7 +166,7 @@ namespace NRF24L01.App
         public void Send(byte[] buffer)
         {
 
-            var str = NAPort.GBK.GetString(buffer);
+            var str = NRF_Serial.GBK.GetString(buffer);
             AddInfo($"<< {str} {string.Join(" ", buffer.Select(b => $"0x{b:X2}"))}");
 
             serial.Send(buffer);
@@ -228,8 +230,8 @@ namespace NRF24L01.App
 
         private void MarkBlock()
         {
-            blocks.Insert(0, (NAPort.GBK.GetBytes(Start)));
-            blocks.Add(NAPort.GBK.GetBytes(End));
+            blocks.Insert(0, (NRF_Serial.GBK.GetBytes(Start)));
+            blocks.Add(NRF_Serial.GBK.GetBytes(End));
         }
 
         private void ClearBlock()

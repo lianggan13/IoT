@@ -1,8 +1,8 @@
 ﻿<Application
-    x:Class="NRF24L01.App.App"
+    x:Class="SYN6288.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:NRF24L01.App"
+    xmlns:local="clr-namespace:SYN6288.App"
     StartupUri="MainWindow.xaml">
     <Application.Resources />
 </Application>

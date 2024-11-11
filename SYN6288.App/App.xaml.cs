@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace NRF24L01.App
+namespace SYN6288.App
 {
     /// <summary>
     /// Interaction logic for App.xaml

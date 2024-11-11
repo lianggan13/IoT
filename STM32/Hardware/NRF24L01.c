@@ -291,7 +291,8 @@ void NRF24L01_TxHalfDuplex(uint8_t *buf, uint8_t addr)
 
 	NRF24L01_TX_Mode(T_ADDR);
 
-	Delay_us(15);
+	// Delay_us(15);
+	WhileDelay_us(15);
 
 	NRF24L01_TxPacket(buf);
 

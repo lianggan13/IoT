@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace NRF24L01.App.Components
+namespace SYN6288.App.Components
 {
     /// <summary>
     /// NumberTextBox.xaml 的交互逻辑

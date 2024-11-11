@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-namespace NRF24L01.App.Converters
+namespace SYN6288.App.Converters
 {
     [ValueConversion(typeof(bool), typeof(bool))]
     public class BoolReverseConverter : IValueConverter

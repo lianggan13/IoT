@@ -1,9 +1,9 @@
 ﻿using System.IO.Ports;
 using System.Text;
 
-namespace NRF24L01.App
+namespace SYN6288.App
 {
-    public class NAPort
+    public class NRF_Serial
     {
         public event Action<byte[]> Received;
 
@@ -11,13 +11,13 @@ namespace NRF24L01.App
 
         public static Encoding GBK { get; }
 
-        static NAPort()
+        static NRF_Serial()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             GBK = Encoding.GetEncoding("gbk");
         }
 
-        public NAPort()
+        public NRF_Serial()
         {
             // https://learn.microsoft.com/en-us/dotnet/api/system.io.ports.serialport?view=dotnet-plat-ext-7.0
         }

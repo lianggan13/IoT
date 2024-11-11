@@ -1,11 +1,11 @@
 ﻿<Window
-    x:Class="NRF24L01.App.MainWindow"
+    x:Class="SYN6288.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:components="clr-namespace:NRF24L01.App.Components"
-    xmlns:converter="clr-namespace:NRF24L01.App.Converters"
+    xmlns:components="clr-namespace:SYN6288.App.Components"
+    xmlns:converter="clr-namespace:SYN6288.App.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:NRF24L01.App"
+    xmlns:local="clr-namespace:SYN6288.App"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="&gt;&gt; Terminal Information"
     Width="1074 "
@@ -69,17 +69,6 @@
                     <GroupBox Header="TTS属性">
                         <StackPanel Orientation="Vertical" TextBlock.FontSize="22">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="前景音量" />
-                                <components:NumberTextBox
-                                    x:Name="numForeVol"
-                                    Width="100"
-                                    Height="40"
-                                    Maximum="16"
-                                    Minimum="0"
-                                    Step="1"
-                                    Text="7" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="背景音量" />
                                 <components:NumberTextBox
                                     x:Name="numBakVol"
@@ -89,6 +78,17 @@
                                     Minimum="0"
                                     Step="1"
                                     Text="1" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="前景音量" />
+                                <components:NumberTextBox
+                                    x:Name="numForeVol"
+                                    Width="100"
+                                    Height="40"
+                                    Maximum="16"
+                                    Minimum="0"
+                                    Step="1"
+                                    Text="7" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="语词语速" />
@@ -132,7 +132,7 @@
 
 
                     <Grid VerticalAlignment="Bottom">
-                        <UniformGrid Columns="1">
+                        <UniformGrid Columns="1" IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                             <UniformGrid.Resources>
                                 <Style TargetType="{x:Type Button}">
                                     <Setter Property="Margin" Value="5" />
@@ -181,7 +181,7 @@
                     <Run Text="串口" />
                     <Run Text=":" />
                 </TextBlock>
-                <ComboBox x:Name="cmbPorts" SelectedIndex="1" />
+                <ComboBox x:Name="cmbPorts" SelectedIndex="2" />
 
                 <TextBlock>
                     <Run Text="波特率" />
