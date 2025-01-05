@@ -11,29 +11,29 @@ namespace SYN6288.App
     class MainClass
     {
         //接入域名，请参见AMQP客户端接入说明文档。
-        static string uid = "1581926549889798"; // 账号ID
+        static string uid = ""; // 账号ID
         public static string regionId = "cn-shanghai";
-        static string Host = $"{uid}.iot-amqp.{regionId}.aliyuncs.com"; // "1581926549889798.iot-amqp.cn-shanghai.aliyuncs.com "
+        static string Host = $"{uid}.iot-amqp.{regionId}.aliyuncs.com"; // 
         static int Port = 5671;
 
-        public static string AccessKey = "LTAI5tGPTQJca4cuvg5V37j9";// Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID");
-        public static string AccessSecret = "urMFHT4o3QrX7savxudjXs8sniyY4l";
+        public static string AccessKey = "";// Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID");
+        public static string AccessSecret = "";
 
-        public static string productKey = "k21juUUmcsq";
+        public static string productKey = "";
 
         // 登录物联网平台控制台，在对应实例的消息转发 > 服务端订阅 > 消费组列表查看您的消费组ID
-        static string consumerGroupId = "DEFAULT_GROUP";
+        static string consumerGroupId = "";
 
         // 表示客户端ID，需您自定义，长度不可超过64个字符。建议使用您的AMQP客户端所在服务器UUID、MAC地址、IP等唯一标识。
         //AMQP客户端接入并启动成功后，登录物联网平台控制台，在对应实例的消息转发 > 服务端订阅 > 消费组列表页签，单击消费组对应的查看，消费组详情页面将显示该参数，方便您识别区分不同的客户端
-        static string clientId = "lianggan13";
+        static string clientId = "";
 
 
         //实例ID。您可在物联网平台控制台的实例概览页面，查看当前实例的ID。
         //若有ID值，必须传入该ID值。
         //若无实例概览页面或ID值，传入空值，即iotInstanceId = ""。
 
-        public static string iotInstanceId = "iot-06z00fkqv0vo5xi";
+        public static string iotInstanceId = "";
         static int Count = 0;
         static int IntervalTime = 10000;
 
