@@ -88,7 +88,7 @@
                                     Maximum="16"
                                     Minimum="0"
                                     Step="1"
-                                    Text="7" />
+                                    Text="3" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="语词语速" />
@@ -170,62 +170,116 @@
                 Grid.Column="1"
                 Width="100"
                 Click="BtnSend_Clicked"
-                Cursor="Hand"
-                IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                Cursor="Hand">
                 发送
             </Button>
+            <!--  IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">  -->
+
         </Grid>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <StackPanel IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource BoolReverseConverter}}" Orientation="Horizontal">
-                <TextBlock>
-                    <Run Text="串口" />
-                    <Run Text=":" />
-                </TextBlock>
-                <ComboBox x:Name="cmbPorts" SelectedIndex="2" />
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="{x:Type TextBox}">
+                        <Setter Property="Width" Value="300" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </StackPanel.Resources>
+                <GroupBox Header="ESP8266">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock>
+                                    <Run Text="WIFI" />
+                                    <Run Text=":" />
+                                </TextBlock>
+                                <TextBox x:Name="txtWifi" Text="AT+CWJAP=&quot;LG13_TPLink_2G&quot;,&quot;G15608212470*&quot;" />
+                            </StackPanel>
+                            <Grid Margin="0,5,0,0" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock>
+                                    <Run Text="TCP " />
+                                    <Run Text=":" />
+                                </TextBlock>
+                                <TextBox x:Name="txtTcp" Text="AT+CIPSTART=&quot;TCP&quot;,&quot;192.168.0.107&quot;,1918" />
+                            </StackPanel>
+                        </StackPanel>
 
-                <TextBlock>
-                    <Run Text="波特率" />
-                    <Run Text=":" />
-                </TextBlock>
-                <ComboBox x:Name="cmbBaudRate" SelectedIndex="1">
-                    <ComboBoxItem>4800</ComboBoxItem>
-                    <ComboBoxItem>9600</ComboBoxItem>
-                    <ComboBoxItem>115200</ComboBoxItem>
-                </ComboBox>
+                        <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
+                            <Button Margin="5,0,5,0" Click="btn_SetClicked">设置</Button>
+                            <Button Margin="5,0" Click="btn_CreateTCPClicked">创建</Button>
+                        </StackPanel>
 
-                <TextBlock>
-                    <Run Text="检验位" />
-                    <Run Text=":" />
-                </TextBlock>
-                <ComboBox x:Name="cmbParity" SelectedIndex="0">
-                    <ComboBoxItem>无校验</ComboBoxItem>
-                </ComboBox>
-
-                <TextBlock>
-                    <Run Text="停止位" />
-                    <Run Text=":" />
-                </TextBlock>
-                <ComboBox x:Name="cmbStopBits" SelectedIndex="0">
-                    <ComboBoxItem>1</ComboBoxItem>
-                </ComboBox>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
 
-            <ToggleButton IsChecked="{Binding IsPortOpen, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-                <ToggleButton.Style>
-                    <Style TargetType="{x:Type ToggleButton}">
-                        <Setter Property="IsChecked" Value="False" />
-                        <Setter Property="Content" Value="打开串口" />
-                        <Style.Triggers>
-                            <Trigger Property="IsChecked" Value="False">
-                                <Setter Property="Content" Value="打开串口" />
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Content" Value="关闭串口" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ToggleButton.Style>
-            </ToggleButton>
+            <StackPanel Orientation="Horizontal">
+                <GroupBox Header="Serial">
+
+                    <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
+
+                        <StackPanel IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource BoolReverseConverter}}" Orientation="Horizontal">
+                            <TextBlock>
+                                <Run Text="串口" />
+                                <Run Text=":" />
+                            </TextBlock>
+                            <ComboBox x:Name="cmbPorts" SelectedIndex="2" />
+
+                            <TextBlock>
+                                <Run Text="波特率" />
+                                <Run Text=":" />
+                            </TextBlock>
+                            <ComboBox x:Name="cmbBaudRate" SelectedIndex="1">
+                                <ComboBoxItem>4800</ComboBoxItem>
+                                <ComboBoxItem>9600</ComboBoxItem>
+                                <ComboBoxItem>115200</ComboBoxItem>
+                            </ComboBox>
+
+                            <TextBlock>
+                                <Run Text="检验位" />
+                                <Run Text=":" />
+                            </TextBlock>
+                            <ComboBox x:Name="cmbParity" SelectedIndex="0">
+                                <ComboBoxItem>无校验</ComboBoxItem>
+                            </ComboBox>
+
+                            <TextBlock>
+                                <Run Text="停止位" />
+                                <Run Text=":" />
+                            </TextBlock>
+                            <ComboBox x:Name="cmbStopBits" SelectedIndex="0">
+                                <ComboBoxItem>1</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <ToggleButton IsChecked="{Binding IsPortOpen, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                            <ToggleButton.Style>
+                                <Style TargetType="{x:Type ToggleButton}">
+                                    <Setter Property="IsChecked" Value="False" />
+                                    <Setter Property="Content" Value="打开串口" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="False">
+                                            <Setter Property="Content" Value="打开串口" />
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Content" Value="关闭串口" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+                    </StackPanel>
+
+
+
+                </GroupBox>
+
+
+            </StackPanel>
+
+
+
         </StackPanel>
+
     </Grid>
 </Window>

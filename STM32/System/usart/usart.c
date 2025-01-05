@@ -42,9 +42,8 @@ void USART3_SendString(u8 *DAT, u8 len)
 	}
 }
 
-u8 USART3_RecvData()
+u8 USART3_RecvData(void)
 {
-	// 注意,读取USARTx->SR能避免莫名其妙的错误
 	return (u8)(USART3->DR & (u8)0x00FF);
 }
 
@@ -80,7 +79,6 @@ void USART3_Init(u32 bound)
 	NVIC_Init(&NVIC_InitStructure);							  // 根据指定的参数初始化VIC寄存器
 
 	// USART 初始化设置
-
 	USART_InitStructure.USART_BaudRate = bound;										// 串口波特率
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;						// 字长为8位数据格式
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;							// 一个停止位
@@ -88,35 +86,9 @@ void USART3_Init(u32 bound)
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 无硬件数据流控制
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;					// 收发模式
 
-	USART_Init(USART3, &USART_InitStructure);	   // 初始化串口1
+	USART_Init(USART3, &USART_InitStructure);	   // 初始化串口3
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE); // 开启串口接受中断
-	USART_Cmd(USART3, ENABLE);					   // 使能串口1
-
-	// TIMER 初始化设置
-	TIM3_Int_Init(49, 7199); // 中断周期 99:10ms 49:50ms 999:10ms
-	TIM_Cmd(TIM3, DISABLE);	 // 关闭定时器7
-}
-
-void USART3_IRQHandler(void) // 串口1中断服务程序
-{
-	if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)
-	{
-		u8 byte = USART3_RecvData();		 // 读取接收到的数据
-		if (USART3_RX_Bytes < RX_BufferSize) // 还可以接收数据
-		{
-			TIM_SetCounter(TIM3, 0); // 计数器清空
-			if (USART3_RX_Bytes == 0)
-			{
-				TIM_Cmd(TIM3, ENABLE); // 使能定时器7的中断 (如果这是第一次接收数据，则启用计时器用于超时处理)
-			}
-
-			USART3_RX_BUF[USART3_RX_Bytes++] = byte; // 记录接收到的值
-		}
-		else
-		{
-			USART3_ResetRX(); // 强制标记接收完成
-		}
-	}
+	USART_Cmd(USART3, ENABLE);					   // 使能串口3
 }
 
 void USART3_ResetRX(void)

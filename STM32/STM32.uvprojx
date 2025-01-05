@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Start;.\Library;.\User;.\System;.\Hardware;.\Hardware\TIMER;.\System\sys;.\System\usart;.\Hardware\SYN6288</IncludePath>
+              <IncludePath>.\Start;.\Library;.\User;.\System;.\Hardware;.\System\sys;.\System\usart;.\Hardware\SYN6288;.\Utility;.\System\timer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -713,6 +713,16 @@
               <FileType>1</FileType>
               <FilePath>.\Hardware\SYN6288\syn6288.c</FilePath>
             </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\System\timer\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\System\timer\timer.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -763,16 +773,6 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\NRF24L01.h</FilePath>
             </File>
-            <File>
-              <FileName>timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\TIMER\timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>timer.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\TIMER\timer.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -797,6 +797,21 @@
               <FileName>stm32f10x_it.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\stm32f10x_it.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Utility</GroupName>
+          <Files>
+            <File>
+              <FileName>utility.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Utility\utility.c</FilePath>
+            </File>
+            <File>
+              <FileName>utility.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Utility\utility.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -29,13 +29,14 @@
 ".\objects\usart.o"
 ".\objects\sys.o"
 ".\objects\syn6288.o"
+".\objects\timer.o"
 ".\objects\led.o"
 ".\objects\key.o"
 ".\objects\oled.o"
 ".\objects\nrf24l01.o"
-".\objects\timer.o"
 ".\objects\main.o"
 ".\objects\stm32f10x_it.o"
+".\objects\utility.o"
 --library_type=microlib --strict --scatter ".\Objects\STM32.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

@@ -292,7 +292,7 @@ void NRF24L01_TxHalfDuplex(uint8_t *buf, uint8_t addr)
 	NRF24L01_TX_Mode(T_ADDR);
 
 	// Delay_us(15);
-	WhileDelay_us(15);
+	APP_Delay(15);
 
 	NRF24L01_TxPacket(buf);
 
@@ -326,8 +326,7 @@ void TestNRF24L01()
 				// if (nrf24l01_buf[1] == '2') // 第1位以后是收到的命令数据，rece_buf[0]是数据位数长度
 				//     LED = 1;
 			}
-	
-		}
+			}
 
 		Delay_ms(10);
 	}

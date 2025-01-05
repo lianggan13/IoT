@@ -1,5 +1,4 @@
-.\objects\timer.o: Hardware\TIMER\timer.c
-.\objects\timer.o: Hardware\TIMER\timer.h
+.\objects\timer.o: System\timer\timer.c
 .\objects\timer.o: .\Start\stm32f10x.h
 .\objects\timer.o: .\Start\core_cm3.h
 .\objects\timer.o: D:\App\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
@@ -29,5 +28,7 @@
 .\objects\timer.o: .\Library\stm32f10x_usart.h
 .\objects\timer.o: .\Library\stm32f10x_wwdg.h
 .\objects\timer.o: .\Library\misc.h
+.\objects\timer.o: System\timer\timer.h
+.\objects\timer.o: .\System\sys\sys.h
 .\objects\timer.o: .\System\usart\usart.h
 .\objects\timer.o: D:\App\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

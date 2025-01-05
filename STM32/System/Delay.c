@@ -1,15 +1,17 @@
 #include "stm32f10x.h"
 
+void APP_Delay(uint32_t xus)
+{
+	// 计算循环次数
+	volatile uint32_t count;
 
-void WhileDelay_us(uint32_t xus) {
-    // 计算循环次数
-    volatile uint32_t count;
-    
-    while (xus--) {
-        // 72MHz 约 72 个循环大约 1 微秒
-        count = 72; // 具体的计数值可能需要根据编译器优化进行调整
-        while (count--);
-    }
+	while (xus--)
+	{
+		// 72MHz 约 72 个循环大约 1 微秒
+		count = 72; // 具体的计数值可能需要根据编译器优化进行调整
+		while (count--)
+			;
+	}
 }
 
 /**

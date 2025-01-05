@@ -15,5 +15,6 @@ extern USART_DataReceivedEvent USART_DataReceived;
 void USART3_Init(u32 bound);
 void USART3_ResetRX(void);
 void USART3_SendString(u8 *DAT, u8 len);
+u8 USART3_RecvData(void);
 void USART3_SendData(u8 data);
 #endif
