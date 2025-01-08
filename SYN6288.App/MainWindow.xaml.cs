@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using Amqp;
+using SYN6288.App.Communication;
+using SYN6288.App.Model;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Net;
@@ -72,13 +74,16 @@ namespace SYN6288.App
             }
         }
 
-        private NRF_Serial serial;
+        private Serial serial;
+        private TcpServer tcp;
+        private AliYun aliyun;
+
         private List<byte[]> blocks = new List<byte[]>();
+
+        public AliYunDevice Device { get; set; } = new AliYunDevice();
 
         public MainWindow()
         {
-            Class2.Test2();
-            MainClass.Test();
             InitializeComponent();
         }
 
@@ -87,13 +92,27 @@ namespace SYN6288.App
             foreach (string port in SerialPort.GetPortNames().OrderBy(p => p))
                 cmbPorts.Items.Add(port);
 
-            serial = new NRF_Serial();
+            serial = new Serial();
             serial.Received += Serial_Received;
+
+            tcp = new TcpServer();
+            tcp.Connected += Tcp_Connected;
+            tcp.Disconnected += Tcp_Disconnected;
+            tcp.ReceivedData += Tcp_ReceivedData;
+            tcp.ThrownException += Tcp_ThrownException;
+
+            aliyun = new AliYun();
+            aliyun.Received += Aliyun_Received;
+        }
+
+        private void Tcp_ThrownException(Exception ex)
+        {
+            AddInfo($"{ex.Message}\r\n{ex}");
         }
 
         private void Serial_Received(byte[] buffer)
         {
-            var recvText = NRF_Serial.GBK.GetString(buffer);
+            var recvText = Serial.GBK.GetString(buffer);
             AddInfo($">> {recvText} {string.Join(" ", buffer.Select(b => $"0x{b:X2}"))}");
 
             var oldBlock = blocks.FirstOrDefault(b => b.SequenceEqual(buffer)
@@ -103,81 +122,93 @@ namespace SYN6288.App
 
             var newBlock = blocks.FirstOrDefault();
             if (newBlock != null)
-                Send(newBlock);
+                SerialSend(newBlock);
         }
 
         private void BtnSend_Clicked(object sender, RoutedEventArgs e)
         {
             var txt = SendText;
+            FillBlock(txt);
 
+            if (radioSerial.IsChecked == true && IsPortOpen)
             {
-
-                // 选择背景音乐2 (0：无背景音乐  1-15：背景音乐可选)
-                // m[0~16]:0背景音乐为静音，16背景音乐音量最大
-                // v[0~16]:0朗读音量为静音，16朗读音量最大
-                // t[0~5]:0朗读语速最慢，5朗读语速最快
-                // o[0~1]:0自然朗读方式，1设置 Word-By-Word 方式
-                // n[0~2]:0自动判断，1数字作号码处理，2数字作数值处理
-                // [2]:控制标记后的2个汉字强制读成“两字词”
-                // [3]:控制标记后的3个汉字强制读成“三字词”
-
-                var m = int.Parse(numBakVol.Text);
-                var v = int.Parse(numForeVol.Text);
-                var t = int.Parse(numSpeed.Text);
-                var o = !(bool)togStyle.IsChecked ? 0 : 1;
-
-                var prefix = $"[v{v}][m{m}][t{t}][o{o}][n1]"; //  "[v7][m1][t5][o0]"
-                txt = $"{prefix}{txt}";
-                var buffer = NRF_Serial.GBK.GetBytes(txt);
-
-                var len = buffer.Length;
-                var DATA_WIDTH = TX_PLOAD_WIDTH - 1;
-                var n = len / DATA_WIDTH;
-
-                ClearBlock();
-
-                byte cmd = 0x01; // 0x01 语音合成播放命令
-                byte enc = 0x01;
-                ushort back = ushort.Parse(numBack.Text);
-                byte para = (byte)(enc | (back << 4));
-
-                blocks.Add(new byte[] { cmd, para }); // 命令、参数
-
-                for (int i = 0; i <= n; i++)
-                {
-                    var block = buffer.Skip(i * DATA_WIDTH).Take(DATA_WIDTH).ToArray();
-                    if (block.Length == 0)
-                        continue;
-
-                    blocks.Add(block);
-                }
-
+                // Serial
                 var block1 = blocks.First();
-                if (IsPortOpen)
-                {
-                    // Serial
-                    Send(block1);
-                }
+                SerialSend(block1);
+            }
 
-
+            if (radioTCP.IsChecked == true)
+            {
                 // TCP Socket
-                var tcpPack = new List<byte>(blocks.SelectMany(b => b)).ToArray();
-                TcpSend(tcpPack);
+                TcpSend();
+            }
+
+            if (radioAliyun.IsChecked == true)
+            {
+                // AliYun (MQTT)
+                // {"led" :0,"humi" :3,"temp":13,}
+                aliyun.PubUserRequset("666");
+                aliyun.PubSetDeviceRequest("");
             }
         }
 
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void FillBlock(string txt)
         {
-            serial.Close();
+            // 选择背景音乐2 (0：无背景音乐  1-15：背景音乐可选)
+            // m[0~16]:0背景音乐为静音，16背景音乐音量最大
+            // v[0~16]:0朗读音量为静音，16朗读音量最大
+            // t[0~5]:0朗读语速最慢，5朗读语速最快
+            // o[0~1]:0自然朗读方式，1设置 Word-By-Word 方式
+            // n[0~2]:0自动判断，1数字作号码处理，2数字作数值处理
+            // [2]:控制标记后的2个汉字强制读成“两字词”
+            // [3]:控制标记后的3个汉字强制读成“三字词”
+
+            var m = int.Parse(numBakVol.Text);
+            var v = int.Parse(numForeVol.Text);
+            var t = int.Parse(numSpeed.Text);
+            var o = !(bool)togStyle.IsChecked ? 0 : 1;
+
+            var prefix = $"[v{v}][m{m}][t{t}][o{o}][n1]"; //  "[v7][m1][t5][o0]"
+            txt = $"{prefix}{txt}";
+            var buffer = Serial.GBK.GetBytes(txt);
+
+            var len = buffer.Length;
+            var DATA_WIDTH = TX_PLOAD_WIDTH - 1;
+            var n = len / DATA_WIDTH;
+
+            ClearBlock();
+
+            byte cmd = 0x01; // 0x01 语音合成播放命令
+            byte enc = 0x01;
+            ushort back = ushort.Parse(numBack.Text);
+            byte para = (byte)(enc | (back << 4));
+
+            blocks.Add(new byte[] { cmd, para }); // 命令、参数
+
+            for (int i = 0; i <= n; i++)
+            {
+                var block = buffer.Skip(i * DATA_WIDTH).Take(DATA_WIDTH).ToArray();
+                if (block.Length == 0)
+                    continue;
+
+                blocks.Add(block);
+            }
         }
 
-        public void Send(byte[] buffer)
+        public void SerialSend(byte[] buffer)
         {
-            var str = NRF_Serial.GBK.GetString(buffer);
+            var str = Serial.GBK.GetString(buffer);
             AddInfo($"<< {str} {string.Join(" ", buffer.Select(b => $"0x{b:X2}"))}");
 
             serial.Send(buffer);
+        }
+
+        private void TcpSend()
+        {
+            var tcpPack = new List<byte>(blocks.SelectMany(b => b)).ToArray();
+            tcp.Send(tcpPack);
+
+            AddInfo($"<< {SendText} {string.Join(" ", tcpPack.Select(b => $"0x{b:X2}"))}");
         }
 
         private void AddInfo(string text)
@@ -197,10 +228,14 @@ namespace SYN6288.App
             });
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            serial.Close();
+        }
+
+
         private void BtnStop_Clicked(object sender, RoutedEventArgs e)
         {
-            // 0x31 设置通讯波特率命令(初始波特率为9600bps)
-
             SendCommand(0x02);  // 0x02 停止合成命令
         }
 
@@ -230,9 +265,8 @@ namespace SYN6288.App
 
             blocks.Add(new byte[] { cmd });
 
-
             var block1 = blocks.First();
-            Send(block1);
+            SerialSend(block1);
         }
 
         private void ClearBlock()
@@ -327,202 +361,50 @@ namespace SYN6288.App
             btn.IsEnabled = true;
         }
 
-        Socket serverSocket = null;
-
-        protected readonly ConcurrentDictionary<string, Socket> clients = new ConcurrentDictionary<string, Socket>();
         private void btn_CreateTCPClicked(object sender, RoutedEventArgs e)
         {
-            if (serverSocket != null)
-            {
-                //serverSocket.Close();
-                //serverSocket.Dispose();
-                //serverSocket = null;
-                foreach (var remote in clients.Values)
-                {
-                    var iPEndPoint = (remote.RemoteEndPoint as IPEndPoint);
-                    var remoteIp = iPEndPoint.Address.MapToIPv4().ToString();
-                    var remotePort = iPEndPoint.Port;
-
-                    RemoveClient(remoteIp, remotePort);
-                }
-                return;
-            }
-
-            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.ReceiveTimeout = 5000; // receive timout 5 seconds
-            serverSocket.SendTimeout = 5000; // send timeout 5 seconds 
-
             var pattern = @"\""(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\"",(?<port>\d{1,5})";
 
-            Regex regex = new Regex(pattern);
-            Match match = regex.Match(txtTcp.Text);
+            var regex = new Regex(pattern);
+            var match = regex.Match(txtTcp.Text);
 
             var ip = match.Groups["ip"].Value;
             var port = int.Parse(match.Groups["port"].Value);
 
-            serverSocket.Bind(new IPEndPoint(IPAddress.Any, port));
-            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse(ip), 1918));
-            serverSocket.Listen(backlog: 15);
+            tcp.Create(ip, port);
 
             AddInfo($"Create tcp server [{ip}:{port}] ok.");
-
-            DoBeginAccept();
         }
 
-        private void DoBeginAccept()
+        private void Tcp_Connected(string ip, int port)
         {
-            serverSocket.BeginAccept(AcceptCallback, null);
+            AddInfo($"{ip}:{port} connected.");
+        }
+        private void Tcp_Disconnected(string ip, int port)
+        {
+            AddInfo($"{ip}:{port} disconnected!");
         }
 
-
-        private void AcceptCallback(IAsyncResult result)
+        private void Tcp_ReceivedData(string ip, int port, byte[] data)
         {
-            DoBeginAccept();
-
-            var remote = serverSocket.EndAccept(result);
-
-            if (remote != null)
-            {
-                var iPEndPoint = (remote.RemoteEndPoint as IPEndPoint);
-                var remoteIp = iPEndPoint.Address.MapToIPv4().ToString();
-                var remotePort = iPEndPoint.Port;
-
-                var clientKey = $"{remoteIp}:{remotePort}";
-                clients[clientKey] = remote;
-
-                AddInfo($"{clientKey} connected.");
-
-                DoBeginReceive(remote, remoteIp, remotePort);
-            }
-        }
-
-
-        private void DoBeginReceive(Socket remote, string remoteIp, int remotePort)
-        {
-            if (remote == null)
-                return;
-
-            //var clientKey = $"{remoteIp}:{remotePort}";
-
-            try
-            {
-                string clientKey = $"{remoteIp}:{remotePort}";
-                while (clients.ContainsKey(clientKey))
-                {
-                    if (remote.Poll(int.MaxValue, SelectMode.SelectRead))
-                    {
-                        var buffer = new byte[128];
-                        var state = new TcpClientState()
-                        {
-                            Remote = remote,
-                            Buffer = buffer
-                        };
-
-                        remote.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveAsyncCallback, state);
-
-                        break;
-                    }
-                    else if (!remote.Connected)
-                        RemoveClient(remoteIp, remotePort); // quit while
-                    else
-                        RemoveClient(remoteIp, remotePort); // quit while
-                }
-            }
-            catch (Exception ex)
-            {
-                RemoveClient(remoteIp, remotePort);
-                AddInfo($"{ex.Message}\r\n{ex}");
-            }
-        }
-
-        private void ReceiveAsyncCallback(IAsyncResult result)
-        {
-            Socket remote = null;
-            string remoteIp = "Unknown";
-            int remotePort = -1;
-            try
-            {
-                var state = result.AsyncState as TcpClientState;
-                remote = state?.Remote;
-                if (remote == null)
-                    return;
-
-                var iPEndPoint = (remote.RemoteEndPoint as IPEndPoint);
-                remoteIp = iPEndPoint.Address.MapToIPv4().ToString();
-                remotePort = iPEndPoint.Port;
-
-                if (!remote.Connected)
-                {
-                    RemoveClient(remoteIp, remotePort);
-                    return;
-                }
-                else
-                {
-                    int bytes = remote.EndReceive(result);
-
-                    if (bytes == 0)
-                        RemoveClient(remoteIp, remotePort);
-                    else if (bytes > 0)
-                        OnReceivedData(remoteIp, remotePort, state.Buffer.Take(bytes).ToArray());
-                }
-            }
-            catch (Exception ex)
-            {
-                AddInfo($"{ex.Message}\r\n{ex}");
-            }
-            finally
-            {
-                DoBeginReceive(remote, remoteIp, remotePort);
-            }
-        }
-
-        protected virtual void OnReceivedData(string ip, int port, byte[] data)
-        {
-            //SocketReceivedDataEventArgs args = new SocketReceivedDataEventArgs(ip, port, data);
-            //ReceivedData?.Invoke(this, args);
             AddInfo($">> {ip}:{port} {string.Join(" ", data.Select(b => $"0x{b:X2}"))}");
         }
 
-        private void TcpSend(byte[] tcpPack)
+        private void btn_StartAMQP(object sender, RoutedEventArgs e)
         {
-            foreach (var remote in clients.Values)
-            {
-                if (!remote.Connected)
-                    continue;
-
-                var iPEndPoint = (remote.RemoteEndPoint as IPEndPoint);
-                var remoteIp = iPEndPoint.Address.MapToIPv4().ToString();
-                var remotePort = iPEndPoint.Port;
-
-                try
-                {
-                    var bytes = remote.Send(tcpPack);
-                    AddInfo($"<< {SendText} [{bytes}] {string.Join(" ", tcpPack.Select(b => $"0x{b:X2}"))}");
-                }
-                catch (Exception ex)
-                {
-                    AddInfo($"{ex.Message}\r\n{ex}");
-                    RemoveClient(remoteIp, remotePort);
-                }
-            }
+            aliyun.StartAMQP();
         }
 
-        public virtual void RemoveClient(string remoteIp, int remotePort)
+        private void Aliyun_Received(Message message)
         {
-            var clientKey = $"{remoteIp}:{remotePort}";
-            if (clients.TryRemove(clientKey, out Socket client))
-            {
-                AddInfo($"{clientKey} disconnected!");
-                client.Close();
-                client.Dispose();
-            }
+            var messageId = message.ApplicationProperties["messageId"];
+            var topic = message.ApplicationProperties["topic"];
+            var body = Encoding.UTF8.GetString((byte[])message.Body);
+            //var replyTo = message.Properties.ReplyTo;
+
+            AddInfo($">> Id:{messageId} Topic:{topic} Body:{body}");
+
+            // TODO: 解析协议 设置 led humi temp 
         }
-    }
-
-    internal class TcpClientState
-    {
-        public Socket Remote { get; set; }
-
-        public byte[] Buffer { get; set; }
     }
 }

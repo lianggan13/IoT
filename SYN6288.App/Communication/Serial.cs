@@ -1,9 +1,9 @@
 ﻿using System.IO.Ports;
 using System.Text;
 
-namespace SYN6288.App
+namespace SYN6288.App.Communication
 {
-    public class NRF_Serial
+    public class Serial
     {
         public event Action<byte[]> Received;
 
@@ -11,13 +11,13 @@ namespace SYN6288.App
 
         public static Encoding GBK { get; }
 
-        static NRF_Serial()
+        static Serial()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             GBK = Encoding.GetEncoding("gbk");
         }
 
-        public NRF_Serial()
+        public Serial()
         {
             // https://learn.microsoft.com/en-us/dotnet/api/system.io.ports.serialport?view=dotnet-plat-ext-7.0
         }

@@ -148,76 +148,22 @@
                     </Grid>
 
                 </StackPanel>
-
-
             </Grid>
-
         </Grid>
 
-
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox
-                VerticalAlignment="Center"
-                d:Text="：各单位请注意，10股道，A列位准备分闸，请注意安全。"
-                FontSize="22"
-                Text="{Binding SendText, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" />
-            <Button
-                x:Name="btnSend"
-                Grid.Column="1"
-                Width="100"
-                Click="BtnSend_Clicked"
-                Cursor="Hand">
-                发送
-            </Button>
-            <!--  IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">  -->
-
-        </Grid>
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
+        <StackPanel Grid.Row="1" Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
-                <StackPanel.Resources>
-                    <Style TargetType="{x:Type TextBox}">
-                        <Setter Property="Width" Value="300" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                    </Style>
-                </StackPanel.Resources>
-                <GroupBox Header="ESP8266">
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock>
-                                    <Run Text="WIFI" />
-                                    <Run Text=":" />
-                                </TextBlock>
-                                <TextBox x:Name="txtWifi" Text="AT+CWJAP=&quot;LG13_TPLink_2G&quot;,&quot;G15608212470*&quot;" />
-                            </StackPanel>
-                            <Grid Margin="0,5,0,0" />
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock>
-                                    <Run Text="TCP " />
-                                    <Run Text=":" />
-                                </TextBlock>
-                                <TextBox x:Name="txtTcp" Text="AT+CIPSTART=&quot;TCP&quot;,&quot;192.168.0.107&quot;,1918" />
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
-                            <Button Margin="5,0,5,0" Click="btn_SetClicked">设置</Button>
-                            <Button Margin="5,0" Click="btn_CreateTCPClicked">创建</Button>
-                        </StackPanel>
-
-                    </StackPanel>
-                </GroupBox>
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <GroupBox Header="Serial">
-
-                    <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
-
+                <GroupBox>
+                    <GroupBox.Header>
+                        <RadioButton
+                            x:Name="radioSerial"
+                            Content="Serial"
+                            GroupName="ComMode" />
+                    </GroupBox.Header>
+                    <StackPanel
+                        VerticalAlignment="Bottom"
+                        IsEnabled="{Binding IsChecked, ElementName=radioSerial}"
+                        Orientation="Horizontal">
                         <StackPanel IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource BoolReverseConverter}}" Orientation="Horizontal">
                             <TextBlock>
                                 <Run Text="串口" />
@@ -269,17 +215,131 @@
                             </ToggleButton.Style>
                         </ToggleButton>
                     </StackPanel>
-
-
-
                 </GroupBox>
+            </StackPanel>
 
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="Width" Value="300" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <RadioButton
+                                x:Name="radioTCP"
+                                Content="TCP"
+                                GroupName="ComMode" />
+                        </GroupBox.Header>
+                        <StackPanel IsEnabled="{Binding IsChecked, ElementName=radioTCP}" Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock>
+                                        <Run Text="WIFI" />
+                                        <Run Text=":" />
+                                    </TextBlock>
+                                    <TextBox x:Name="txtWifi" Text="AT+CWJAP=&quot;LG13_TPLink_2G&quot;,&quot;G15608212470*&quot;" />
+                                </StackPanel>
+                                <Grid Margin="0,5,0,0" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock>
+                                        <Run Text="TCP " />
+                                        <Run Text=":" />
+                                    </TextBlock>
+                                    <TextBox x:Name="txtTcp" Text="AT+CIPSTART=&quot;TCP&quot;,&quot;192.168.0.107&quot;,1918" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
+                                <Button Margin="5,0,5,0" Click="btn_SetClicked">设置</Button>
+                                <Button Margin="5,0" Click="btn_CreateTCPClicked">创建</Button>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <RadioButton
+                                x:Name="radioAliyun"
+                                Content="AliYun"
+                                GroupName="ComMode"
+                                IsChecked="True" />
+                        </GroupBox.Header>
+                        <StackPanel
+                            VerticalAlignment="Bottom"
+                            IsEnabled="{Binding IsChecked, ElementName=radioAliyun}"
+                            Orientation="Horizontal">
+                            <StackPanel DataContext="{Binding Device, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Orientation="Horizontal">
+
+                                <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
+                                    <Button Margin="5,0,5,0" Click="btn_StartAMQP">AMQP</Button>
+                                </StackPanel>
+                                <TextBlock>
+                                    <Run Text="LED" />
+                                    <Run Text=":" />
+                                </TextBlock>
+                                <RadioButton
+                                    VerticalAlignment="Center"
+                                    Content="0-关"
+                                    GroupName="led" />
+                                <RadioButton
+                                    VerticalAlignment="Center"
+                                    Content="1-开"
+                                    GroupName="led"
+                                    IsChecked="{Binding Led}" />
+
+                                <TextBlock Margin="5,0,0,0">
+                                    <Run Text="Humi" />
+                                    <Run Text=":" />
+                                </TextBlock>
+                                <TextBlock>
+                                    <Run Text="{Binding Humi}" />
+                                    <Run Text="%RH" />
+                                </TextBlock>
+
+                                <TextBlock Margin="5,0,0,0">
+                                    <Run Text="Temp" />
+                                    <Run Text=":" />
+                                </TextBlock>
+                                <TextBlock>
+                                    <Run Text="{Binding Temp}" />
+                                    <Run Text="℃" />
+                                </TextBlock>
+
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
 
             </StackPanel>
 
 
-
         </StackPanel>
 
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+                VerticalAlignment="Center"
+                d:Text="：各单位请注意，10股道，A列位准备分闸，请注意安全。"
+                FontSize="22"
+                Text="{Binding SendText, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" />
+            <Button
+                x:Name="btnSend"
+                Grid.Column="1"
+                Width="100"
+                Click="BtnSend_Clicked"
+                Cursor="Hand">
+                发送
+            </Button>
+            <!--  IsEnabled="{Binding IsPortOpen, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}">  -->
+        </Grid>
     </Grid>
 </Window>
