@@ -517,3 +517,4 @@ healthchecksdb
 /STM32/Objects/STM32_Target 1.dep
 /STM32/Objects/syn6288.crf
 /STM32/Objects/syn6288.o
+/SYN6288.App/appsettings.json
