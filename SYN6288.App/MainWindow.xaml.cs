@@ -1,4 +1,6 @@
 ﻿using Amqp;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SYN6288.App.Communication;
 using SYN6288.App.Model;
 using System.ComponentModel;
@@ -9,7 +11,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-
 
 namespace SYN6288.App
 {
@@ -128,6 +129,15 @@ namespace SYN6288.App
         private void BtnSend_Clicked(object sender, RoutedEventArgs e)
         {
             var txt = SendText;
+
+            var m = int.Parse(numBakVol.Text);
+            var v = int.Parse(numForeVol.Text);
+            var t = int.Parse(numSpeed.Text);
+            var o = !(bool)togStyle.IsChecked ? 0 : 1;
+
+            var prefix = $"[v{v}][m{m}][t{t}][o{o}][n1]"; //  "[v7][m1][t5][o0]"
+            txt = $"{prefix}{txt}";
+
             FillBlock(txt);
 
             if (radioSerial.IsChecked == true && IsPortOpen)
@@ -146,9 +156,11 @@ namespace SYN6288.App
             if (radioAliyun.IsChecked == true)
             {
                 // AliYun (MQTT)
-                // {"led" :0,"humi" :3,"temp":13,}
-                aliyun.PubUserRequset("666");
-                aliyun.PubSetDeviceRequest("");
+                var voice = new
+                {
+                    voice = txt
+                };
+                AliYunSend(JsonConvert.SerializeObject(voice).ToLower());
             }
         }
 
@@ -163,13 +175,6 @@ namespace SYN6288.App
             // [2]:控制标记后的2个汉字强制读成“两字词”
             // [3]:控制标记后的3个汉字强制读成“三字词”
 
-            var m = int.Parse(numBakVol.Text);
-            var v = int.Parse(numForeVol.Text);
-            var t = int.Parse(numSpeed.Text);
-            var o = !(bool)togStyle.IsChecked ? 0 : 1;
-
-            var prefix = $"[v{v}][m{m}][t{t}][o{o}][n1]"; //  "[v7][m1][t5][o0]"
-            txt = $"{prefix}{txt}";
             var buffer = Serial.GBK.GetBytes(txt);
 
             var len = buffer.Length;
@@ -393,18 +398,73 @@ namespace SYN6288.App
         private void btn_StartAMQP(object sender, RoutedEventArgs e)
         {
             aliyun.StartAMQP();
+            AddInfo($">> Start AMQP.");
+
+            var response = aliyun.QueryDevicePropRequest();
+            var json = JsonConvert.SerializeObject(response, Formatting.Indented);
+            AddInfo($">> {json}");
+
+            var props = response.Body.Data.List.PropertyStatusInfo;
+            var led = props.SingleOrDefault(p => p.Identifier == "led");
+            var humi = props.SingleOrDefault(p => p.Identifier == "humi");
+            var temp = props.SingleOrDefault(p => p.Identifier == "temp");
+
+            Device.Led = int.Parse(led.Value);
+            Device.Humi = int.Parse(humi.Value);
+            Device.Temp = int.Parse(temp.Value);
+        }
+
+        private void btn_SetDevice(object sender, RoutedEventArgs e)
+        {
+            //var json = JsonConvert.SerializeObject(Device).ToLower();
+            // {"led":0,"humi":3,"temp":13}
+            var device = new
+            {
+                led = Device.Led,
+            };
+
+            AliYunSend(JsonConvert.SerializeObject(device).ToLower());
+        }
+
+        private void AliYunSend(string json)
+        {
+            AddInfo($"<< {json}");
+
+            var response = aliyun.PubSetDeviceRequest(json);
+
+            AddInfo($">> {JsonConvert.SerializeObject(response)}");
         }
 
         private void Aliyun_Received(Message message)
         {
             var messageId = message.ApplicationProperties["messageId"];
-            var topic = message.ApplicationProperties["topic"];
+            var topic = message.ApplicationProperties["topic"].ToString();
             var body = Encoding.UTF8.GetString((byte[])message.Body);
-            //var replyTo = message.Properties.ReplyTo;
 
             AddInfo($">> Id:{messageId} Topic:{topic} Body:{body}");
 
-            // TODO: 解析协议 设置 led humi temp 
+            const string prop_post_topic = "/k21juUUmcsq/stm32/thing/event/property/post";
+            if (topic == prop_post_topic)
+            {
+                var jObject = JObject.Parse(body);
+                //var deviceName = jObject["deviceName"].ToObject<string>();
+                var items = jObject["items"].ToObject<JObject>();
+
+                if (items.TryGetValue("device", StringComparison.OrdinalIgnoreCase, out var led))
+                {
+                    Device.Led = led["value"].ToObject<int>();
+                }
+
+                if (items.TryGetValue("humi", StringComparison.OrdinalIgnoreCase, out var humi))
+                {
+                    Device.Humi = humi["value"].ToObject<int>();
+                }
+
+                if (items.TryGetValue("temp", StringComparison.OrdinalIgnoreCase, out var temp))
+                {
+                    Device.Temp = temp["value"].ToObject<int>();
+                }
+            }
         }
     }
 }

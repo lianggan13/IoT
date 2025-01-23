@@ -273,46 +273,56 @@
                         <StackPanel
                             VerticalAlignment="Bottom"
                             IsEnabled="{Binding IsChecked, ElementName=radioAliyun}"
-                            Orientation="Horizontal">
-                            <StackPanel DataContext="{Binding Device, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Orientation="Horizontal">
-
-                                <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
-                                    <Button Margin="5,0,5,0" Click="btn_StartAMQP">AMQP</Button>
-                                </StackPanel>
-                                <TextBlock>
-                                    <Run Text="LED" />
-                                    <Run Text=":" />
-                                </TextBlock>
-                                <RadioButton
-                                    VerticalAlignment="Center"
-                                    Content="0-关"
-                                    GroupName="led" />
-                                <RadioButton
-                                    VerticalAlignment="Center"
-                                    Content="1-开"
-                                    GroupName="led"
-                                    IsChecked="{Binding Led}" />
-
-                                <TextBlock Margin="5,0,0,0">
-                                    <Run Text="Humi" />
-                                    <Run Text=":" />
-                                </TextBlock>
-                                <TextBlock>
-                                    <Run Text="{Binding Humi}" />
-                                    <Run Text="%RH" />
-                                </TextBlock>
-
-                                <TextBlock Margin="5,0,0,0">
-                                    <Run Text="Temp" />
-                                    <Run Text=":" />
-                                </TextBlock>
-                                <TextBlock>
-                                    <Run Text="{Binding Temp}" />
-                                    <Run Text="℃" />
-                                </TextBlock>
-
+                            Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ToggleButton Click="btn_StartAMQP">开始监听</ToggleButton>
                             </StackPanel>
+
+                            <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
+                                <StackPanel.Resources>
+                                    <Style TargetType="{x:Type TextBox}">
+                                        <Setter Property="Width" Value="50" />
+                                    </Style>
+                                </StackPanel.Resources>
+                                <StackPanel DataContext="{Binding Device, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Orientation="Horizontal">
+                                    <TextBlock>
+                                        <Run Text="LED" />
+                                        <Run Text=":" />
+                                    </TextBlock>
+                                    <RadioButton
+                                        VerticalAlignment="Center"
+                                        Content="0-关"
+                                        IsChecked="{Binding Led, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolReverseConverter}}" />
+                                    <RadioButton
+                                        VerticalAlignment="Center"
+                                        Content="1-开"
+                                        IsChecked="{Binding Led, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <TextBlock Margin="5,0,0,0">
+                                        <Run Text="Humi" />
+                                        <Run Text=":" />
+                                    </TextBlock>
+                                    <TextBox IsReadOnly="True" Text="{Binding Humi}" />
+                                    <TextBlock>
+                                        <Run Text="%RH" />
+                                    </TextBlock>
+
+                                    <TextBlock Margin="5,0,0,0">
+                                        <Run Text="Temp" />
+                                        <Run Text=":" />
+                                    </TextBlock>
+                                    <TextBox IsReadOnly="True" Text="{Binding Temp}" />
+                                    <TextBlock>
+                                        <Run Text="℃" />
+                                    </TextBlock>
+
+                                    <Button Click="btn_SetDevice">设置</Button>
+
+                                </StackPanel>
+                            </StackPanel>
+
                         </StackPanel>
+
                     </GroupBox>
                 </StackPanel>
 

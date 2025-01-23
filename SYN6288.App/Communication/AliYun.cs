@@ -167,6 +167,21 @@ namespace SYN6288.App.Communication
             return new AlibabaCloud.SDK.Iot20180120.Client(config);
         }
 
+        public QueryDevicePropertyStatusResponse QueryDevicePropRequest()
+        {
+            var client = CreateApiClient();
+            var queryDevicePropertyStatusRequest = new AlibabaCloud.SDK.Iot20180120.Models.QueryDevicePropertyStatusRequest
+            {
+                IotInstanceId = IotInstanceId,
+                ProductKey = ProductKey,
+                DeviceName = DeviceName,
+            };
+            var runtime = new AlibabaCloud.TeaUtil.Models.RuntimeOptions();
+            var response = client.QueryDevicePropertyStatusWithOptions(queryDevicePropertyStatusRequest, runtime);
+
+            return response;
+        }
+
         public PubResponse PubUserRequset(string msg)
         {
             var topic = $"/{ProductKey}/{DeviceName}/user/get";

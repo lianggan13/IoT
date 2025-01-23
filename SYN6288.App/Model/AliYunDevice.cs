@@ -42,15 +42,15 @@ namespace SYN6288.App.Model
             set { SetProperty(ref led, value); }
         }
 
-        private double humi;
-        public double Humi
+        private int humi;
+        public int Humi
         {
             get { return humi; }
             set { SetProperty(ref humi, value); }
         }
 
-        private double temp;
-        public double Temp
+        private int temp;
+        public int Temp
         {
             get { return temp; }
             set { SetProperty(ref temp, value); }
