@@ -57,9 +57,8 @@ namespace SYN6288.App.Communication
 
         Address address;
 
-
-
         public event Action<Message>? Received;
+        public event Action<Exception> ThrownException;
 
         public AliYun()
         {
@@ -103,17 +102,27 @@ namespace SYN6288.App.Communication
             var port = 5671;
 
             address = new Address(host, port, userName, password);
-            var cf = new ConnectionFactory();
-            cf.AMQP.IdleTimeout = 120000;
-            //cf.AMQP.ContainerId、cf.AMQP.HostName 自定义
-            cf.AMQP.ContainerId = "client.1.2";
-            cf.AMQP.HostName = "contoso.com";
-            cf.AMQP.MaxFrameSize = 8 * 1024;
-            var connection = cf.CreateAsync(address).Result;
 
-            connection.AddClosedCallback(ConnClosed);
+            try
+            {
+                var cf = new ConnectionFactory();
+                cf.AMQP.IdleTimeout = 120000;
+                //cf.AMQP.ContainerId、cf.AMQP.HostName 自定义
+                cf.AMQP.ContainerId = "client.1.2";
+                cf.AMQP.HostName = "contoso.com";
+                cf.AMQP.MaxFrameSize = 8 * 1024;
+                var connection = cf.CreateAsync(address).Result;
 
-            DoReceive(connection);
+                connection.AddClosedCallback(ConnClosed);
+                DoReceive(connection);
+            }
+            catch (Exception ex)
+            {
+                ThrownException?.Invoke(ex);
+
+                Thread.Sleep(1000);
+                DoConnection(address.User, address.Password);
+            }
         }
 
         void DoReceive(Connection connection)

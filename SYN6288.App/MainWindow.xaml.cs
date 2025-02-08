@@ -104,9 +104,15 @@ namespace SYN6288.App
 
             aliyun = new AliYun();
             aliyun.Received += Aliyun_Received;
+            aliyun.ThrownException += Aliyun_ThrownException;
         }
 
         private void Tcp_ThrownException(Exception ex)
+        {
+            AddInfo($"{ex.Message}\r\n{ex}");
+        }
+
+        private void Aliyun_ThrownException(Exception ex)
         {
             AddInfo($"{ex.Message}\r\n{ex}");
         }
