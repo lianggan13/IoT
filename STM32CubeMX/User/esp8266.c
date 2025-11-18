@@ -79,7 +79,7 @@ uint8_t uart2_wait_recv(uint32_t timout)
   {
     count++;
     HAL_Delay(1);
-    if (it)
+    if (it) // it is set in TIM3_PeriodElapsedCallback
     {
       count = 0;
       break;
@@ -289,13 +289,18 @@ const char *PUB_TOPIC = "/sys/k21juUUmcsq/stm32/thing/event/property/post";
 
 void mqtt_test(void)
 {
-  return;
   char mqtt_buf2[256];
+
+  // MQTT publish led status
+  // AT+MQTTPUB=0,"/sys/a1TGt6tIcAE/mqtt_stm32/thing/event/property/post","{\"params\":{\"led\":8},\"version\":\"1.0.0\"}",0,0
   snprintf(mqtt_buf2, sizeof(mqtt_buf2), "AT+MQTTPUB=0,\"%s\",\"{\\\"params\\\":{\\\"led\\\":%d\\}\\,\\\"version\\\":\\\"1.0.0\\\"}\",%d,%d", PUB_TOPIC, 8, 0, 0);
   printf("%s\n", mqtt_buf2);
 
   // ClearArray(mqtt_buf2, sizeof(mqtt_buf2));
   memset(mqtt_buf2, 0x00, sizeof(mqtt_buf2));
+
+  // MQTT publish temperature and humidity
+  // AT+MQTTPUB=0,"/sys/a1TGt6tIcAE/mqtt_stm32/thing/event/property/post","{\"params\":{\"temp\":8,\"humi\":8},\"version\":\"1.0.0\"}",0,0
   snprintf((char *)mqtt_buf2, sizeof(mqtt_buf2), "AT+MQTTPUB=0,\"" PUB_TOPIC2 "\",\"" JSON_FORMAT "\",0,0\r\n", 8, 8);
   printf("%s\n", mqtt_buf2);
 
@@ -309,6 +314,7 @@ void mqtt_start(void)
   // AliYun:  https://help.aliyun.com/zh/iot/product-overview/limits | https://developer.aliyun.com/article/1163947
   // AT+MQTT: https://blog.csdn.net/espressif/article/details/101713780
 
+  // Step 1: 设置 MQTT 用户信息
   // AT+MQTTUSERCFG=<LinkID>,<scheme>,<"client_id">,<"username">,<"password">,<cert_key_ID>,<CA_ID>,<"path">
   // client_id: 对应 MQTT client ID, 用于标志 client 身份, 最长 256 字节
   // username: 用于登录 MQTT broker 的 username, 最长 64 字节
@@ -325,6 +331,7 @@ void mqtt_start(void)
 
   memset(mqtt_buf, 0x00, sizeof(mqtt_buf));
 
+  // Step 2: 连接 MQTT Broker
   // AT+MQTTCONN=<LinkID>,<"host">,<port>,<reconnect>
   // LinkID: 当前只支持 0
   // host: 连接 MQTT broker 域名, 最大 128 字节
@@ -337,6 +344,7 @@ void mqtt_start(void)
 
   memset(mqtt_buf, 0x00, sizeof(mqtt_buf));
 
+  // Step 3: 订阅主题
   // AT+MQTTSUB=<LinkID>,<"topic">,<qos>
   // LinkID: 当前只支持 0
   // state: MQTT 当前状态, 状态说明如下:
@@ -415,17 +423,18 @@ void mqtt_start(void)
 
 void esp8266_init(void)
 {
-  mqtt_test();
+  // mqtt_test();
 
   char wifi[128];
   char tcp[64];
 
-  Flash_Read(PAGE_ADDRESS(31), (uint32_t *)wifi, sizeof(wifi));
-  Flash_Read(PAGE_ADDRESS(32), (uint32_t *)tcp, sizeof(tcp));
+  Flash_Read(PAGE_ADDRESS(31), (uint32_t *)wifi, sizeof(wifi)); // "AT+CWJAP=\"LG13_TPLink_2G\",\"G15608212470*\""
+  Flash_Read(PAGE_ADDRESS(32), (uint32_t *)tcp, sizeof(tcp));   // "AT+CIPSTART=\"TCP\",\"
 
+  // sta --> connect wifi --> connect tcp
   esp8266_sta();
   uint8_t pass = esp8266_connect_wifi(wifi);
-  // mqtt...
+
   mqtt_start();
 
   while (true)

@@ -1,4 +1,4 @@
-#include <stdio.h>	// 用于 printf（如果需要）
+#include <stdio.h>	// 用于 printf
 #include <stdlib.h> // 用于 malloc 和 free
 #include <string.h> // 用于 memset
 #include <stdint.h> // 用于 uint8_t
