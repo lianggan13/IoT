@@ -39,20 +39,20 @@ typedef union
     uint8_t u;
 } char_;
 
-#define isdigit_( x )    ( ( ( x ) >= '0' ) && ( ( x ) <= '9' ) )
-#define iscntrl_( x )    ( ( ( x ) >= '\0' ) && ( ( x ) < ' ' ) )
+#define isdigit_(x) (((x) >= '0') && ((x) <= '9'))
+#define iscntrl_(x) (((x) >= '\0') && ((x) < ' '))
 /* NB. This is whitespace as defined by the JSON standard (ECMA-404). */
-#define isspace_( x )                          \
-    ( ( ( x ) == ' ' ) || ( ( x ) == '\t' ) || \
-      ( ( x ) == '\n' ) || ( ( x ) == '\r' ) )
+#define isspace_(x)                   \
+    (((x) == ' ') || ((x) == '\t') || \
+     ((x) == '\n') || ((x) == '\r'))
 
-#define isOpenBracket_( x )           ( ( ( x ) == '{' ) || ( ( x ) == '[' ) )
-#define isCloseBracket_( x )          ( ( ( x ) == '}' ) || ( ( x ) == ']' ) )
-#define isCurlyPair_( x, y )          ( ( ( x ) == '{' ) && ( ( y ) == '}' ) )
-#define isSquarePair_( x, y )         ( ( ( x ) == '[' ) && ( ( y ) == ']' ) )
-#define isMatchingBracket_( x, y )    ( isCurlyPair_( x, y ) || isSquarePair_( x, y ) )
-#define isSquareOpen_( x )            ( ( x ) == '[' )
-#define isSquareClose_( x )           ( ( x ) == ']' )
+#define isOpenBracket_(x) (((x) == '{') || ((x) == '['))
+#define isCloseBracket_(x) (((x) == '}') || ((x) == ']'))
+#define isCurlyPair_(x, y) (((x) == '{') && ((y) == '}'))
+#define isSquarePair_(x, y) (((x) == '[') && ((y) == ']'))
+#define isMatchingBracket_(x, y) (isCurlyPair_(x, y) || isSquarePair_(x, y))
+#define isSquareOpen_(x) ((x) == '[')
+#define isSquareClose_(x) ((x) == ']')
 
 /**
  * @brief Advance buffer index beyond whitespace.
@@ -61,17 +61,17 @@ typedef union
  * @param[in,out] start  The index at which to begin.
  * @param[in] max  The size of the buffer.
  */
-static void skipSpace( const char * buf,
-                       size_t * start,
-                       size_t max )
+static void skipSpace(const char *buf,
+                      size_t *start,
+                      size_t max)
 {
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
-    for( i = *start; i < max; i++ )
+    for (i = *start; i < max; i++)
     {
-        if( !isspace_( buf[ i ] ) )
+        if (!isspace_(buf[i]))
         {
             break;
         }
@@ -88,15 +88,15 @@ static void skipSpace( const char * buf,
  *
  * @return the count
  */
-static size_t countHighBits( uint8_t c )
+static size_t countHighBits(uint8_t c)
 {
     uint8_t n = c;
     size_t i = 0;
 
-    while( ( n & 0x80U ) != 0U )
+    while ((n & 0x80U) != 0U)
     {
         i++;
-        n = ( n & 0x7FU ) << 1U;
+        n = (n & 0x7FU) << 1U;
     }
 
     return i;
@@ -119,34 +119,34 @@ static size_t countHighBits( uint8_t c )
  *
  * @note Disallow ASCII, as this is called only for multibyte sequences.
  */
-static bool shortestUTF8( size_t length,
-                          uint32_t value )
+static bool shortestUTF8(size_t length,
+                         uint32_t value)
 {
     bool ret = false;
     uint32_t min, max;
 
-    assert( ( length >= 2U ) && ( length <= 4U ) );
+    assert((length >= 2U) && (length <= 4U));
 
-    switch( length )
+    switch (length)
     {
-        case 2:
-            min = ( uint32_t ) 1 << 7U;
-            max = ( ( uint32_t ) 1 << 11U ) - 1U;
-            break;
+    case 2:
+        min = (uint32_t)1 << 7U;
+        max = ((uint32_t)1 << 11U) - 1U;
+        break;
 
-        case 3:
-            min = ( uint32_t ) 1 << 11U;
-            max = ( ( uint32_t ) 1 << 16U ) - 1U;
-            break;
+    case 3:
+        min = (uint32_t)1 << 11U;
+        max = ((uint32_t)1 << 16U) - 1U;
+        break;
 
-        default:
-            min = ( uint32_t ) 1 << 16U;
-            max = 0x10FFFFU;
-            break;
+    default:
+        min = (uint32_t)1 << 16U;
+        max = 0x10FFFFU;
+        break;
     }
 
-    if( ( value >= min ) && ( value <= max ) &&
-        ( ( value < 0xD800U ) || ( value > 0xDFFFU ) ) )
+    if ((value >= min) && (value <= max) &&
+        ((value < 0xD800U) || (value > 0xDFFFU)))
     {
         ret = true;
     }
@@ -177,51 +177,50 @@ static bool shortestUTF8( size_t length,
  * would introduce a non-shortest sequence, and F5 or above would
  * introduce a value greater than the last code point, 0x10FFFF.
  */
-static bool skipUTF8MultiByte( const char * buf,
-                               size_t * start,
-                               size_t max )
+static bool skipUTF8MultiByte(const char *buf,
+                              size_t *start,
+                              size_t max)
 {
     bool ret = false;
     size_t i, bitCount, j;
     uint32_t value = 0;
     char_ c;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
-    assert( i < max );
-    assert( buf[ i ] < '\0' );
+    assert(i < max);
 
-    c.c = buf[ i ];
+    c.c = buf[i];
 
-    if( ( c.u > 0xC1U ) && ( c.u < 0xF5U ) )
+    if ((c.u > 0xC1U) && (c.u < 0xF5U))
     {
-        bitCount = countHighBits( c.u );
-        value = ( ( uint32_t ) c.u ) & ( ( ( uint32_t ) 1 << ( 7U - bitCount ) ) - 1U );
+        bitCount = countHighBits(c.u);
+        value = ((uint32_t)c.u) & (((uint32_t)1 << (7U - bitCount)) - 1U);
 
         /* The bit count is 1 greater than the number of bytes,
          * e.g., when j is 2, we skip one more byte. */
-        for( j = bitCount - 1U; j > 0U; j-- )
+        for (j = bitCount - 1U; j > 0U; j--)
         {
             i++;
 
-            if( i >= max )
+            if (i >= max)
             {
                 break;
             }
 
-            c.c = buf[ i ];
+            c.c = buf[i];
 
             /* Additional bytes must match 10xxxxxx. */
-            if( ( c.u & 0xC0U ) != 0x80U )
+            if ((c.u & 0xC0U) != 0x80U)
             {
                 break;
             }
 
-            value = ( value << 6U ) | ( c.u & 0x3FU );
+            value = (value << 6U) | (c.u & 0x3FU);
         }
 
-        if( ( j == 0U ) && ( shortestUTF8( bitCount, value ) == true ) )
+        if ((j == 0U) && (shortestUTF8(bitCount, value) == true))
         {
             *start = i + 1U;
             ret = true;
@@ -241,25 +240,25 @@ static bool skipUTF8MultiByte( const char * buf,
  * @return true if a valid code point was present;
  * false otherwise.
  */
-static bool skipUTF8( const char * buf,
-                      size_t * start,
-                      size_t max )
+static bool skipUTF8(const char *buf,
+                     size_t *start,
+                     size_t max)
 {
     bool ret = false;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
-    if( *start < max )
+    if (*start < max)
     {
         /* an ASCII byte */
-        if( buf[ *start ] >= '\0' )
+        if ((int8_t)buf[*start] >= '\0')
         {
             *start += 1U;
             ret = true;
         }
         else
         {
-            ret = skipUTF8MultiByte( buf, start, max );
+            ret = skipUTF8MultiByte(buf, start, max);
         }
     }
 
@@ -273,24 +272,24 @@ static bool skipUTF8( const char * buf,
  *
  * @return the integer value upon success or NOT_A_HEX_CHAR on failure.
  */
-#define NOT_A_HEX_CHAR    ( 0x10U )
-static uint8_t hexToInt( char c )
+#define NOT_A_HEX_CHAR (0x10U)
+static uint8_t hexToInt(char c)
 {
     char_ n;
 
     n.c = c;
 
-    if( ( c >= 'a' ) && ( c <= 'f' ) )
+    if ((c >= 'a') && (c <= 'f'))
     {
         n.c -= 'a';
         n.u += 10U;
     }
-    else if( ( c >= 'A' ) && ( c <= 'F' ) )
+    else if ((c >= 'A') && (c <= 'F'))
     {
         n.c -= 'A';
         n.u += 10U;
     }
-    else if( isdigit_( c ) )
+    else if (isdigit_(c))
     {
         n.c -= '0';
     }
@@ -316,38 +315,38 @@ static uint8_t hexToInt( char c )
  *
  * @note For the sake of security, \u0000 is disallowed.
  */
-static bool skipOneHexEscape( const char * buf,
-                              size_t * start,
-                              size_t max,
-                              uint16_t * outValue )
+static bool skipOneHexEscape(const char *buf,
+                             size_t *start,
+                             size_t max,
+                             uint16_t *outValue)
 {
     bool ret = false;
     size_t i, end;
     uint16_t value = 0;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
-    assert( outValue != NULL );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
+    assert(outValue != NULL);
 
     i = *start;
-#define HEX_ESCAPE_LENGTH    ( 6U )   /* e.g., \u1234 */
+#define HEX_ESCAPE_LENGTH (6U) /* e.g., \u1234 */
     end = i + HEX_ESCAPE_LENGTH;
 
-    if( ( end < max ) && ( buf[ i ] == '\\' ) && ( buf[ i + 1U ] == 'u' ) )
+    if ((end < max) && (buf[i] == '\\') && (buf[i + 1U] == 'u'))
     {
-        for( i += 2U; i < end; i++ )
+        for (i += 2U; i < end; i++)
         {
-            uint8_t n = hexToInt( buf[ i ] );
+            uint8_t n = hexToInt(buf[i]);
 
-            if( n == NOT_A_HEX_CHAR )
+            if (n == NOT_A_HEX_CHAR)
             {
                 break;
             }
 
-            value = ( value << 4U ) | n;
+            value = (value << 4U) | n;
         }
     }
 
-    if( ( i == end ) && ( value > 0U ) )
+    if ((i == end) && (value > 0U))
     {
         ret = true;
         *outValue = value;
@@ -374,32 +373,32 @@ static bool skipOneHexEscape( const char * buf,
  *
  * @note For the sake of security, \u0000 is disallowed.
  */
-#define isHighSurrogate( x )    ( ( ( x ) >= 0xD800U ) && ( ( x ) <= 0xDBFFU ) )
-#define isLowSurrogate( x )     ( ( ( x ) >= 0xDC00U ) && ( ( x ) <= 0xDFFFU ) )
+#define isHighSurrogate(x) (((x) >= 0xD800U) && ((x) <= 0xDBFFU))
+#define isLowSurrogate(x) (((x) >= 0xDC00U) && ((x) <= 0xDFFFU))
 
-static bool skipHexEscape( const char * buf,
-                           size_t * start,
-                           size_t max )
+static bool skipHexEscape(const char *buf,
+                          size_t *start,
+                          size_t max)
 {
     bool ret = false;
     size_t i;
     uint16_t value;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    if( skipOneHexEscape( buf, &i, max, &value ) == true )
+    if (skipOneHexEscape(buf, &i, max, &value) == true)
     {
-        if( isHighSurrogate( value ) )
+        if (isHighSurrogate(value))
         {
-            if( ( skipOneHexEscape( buf, &i, max, &value ) == true ) &&
-                ( isLowSurrogate( value ) ) )
+            if ((skipOneHexEscape(buf, &i, max, &value) == true) &&
+                (isLowSurrogate(value)))
             {
                 ret = true;
             }
         }
-        else if( isLowSurrogate( value ) )
+        else if (isLowSurrogate(value))
         {
             /* premature low surrogate */
         }
@@ -409,7 +408,7 @@ static bool skipHexEscape( const char * buf,
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *start = i;
     }
@@ -429,56 +428,56 @@ static bool skipHexEscape( const char * buf,
  *
  * @note For the sake of security, \NUL is disallowed.
  */
-static bool skipEscape( const char * buf,
-                        size_t * start,
-                        size_t max )
+static bool skipEscape(const char *buf,
+                       size_t *start,
+                       size_t max)
 {
     bool ret = false;
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    if( ( i < ( max - 1U ) ) && ( buf[ i ] == '\\' ) )
+    if ((i < (max - 1U)) && (buf[i] == '\\'))
     {
-        char c = buf[ i + 1U ];
+        char c = buf[i + 1U];
 
-        switch( c )
+        switch (c)
         {
-            case '\0':
-                break;
+        case '\0':
+            break;
 
-            case 'u':
-                ret = skipHexEscape( buf, &i, max );
-                break;
+        case 'u':
+            ret = skipHexEscape(buf, &i, max);
+            break;
 
-            case '"':
-            case '\\':
-            case '/':
-            case 'b':
-            case 'f':
-            case 'n':
-            case 'r':
-            case 't':
+        case '"':
+        case '\\':
+        case '/':
+        case 'b':
+        case 'f':
+        case 'n':
+        case 'r':
+        case 't':
+            i += 2U;
+            ret = true;
+            break;
+
+        default:
+
+            /* a control character: (NUL,SPACE) */
+            if (iscntrl_((int8_t)c))
+            {
                 i += 2U;
                 ret = true;
-                break;
+            }
 
-            default:
-
-                /* a control character: (NUL,SPACE) */
-                if( iscntrl_( c ) )
-                {
-                    i += 2U;
-                    ret = true;
-                }
-
-                break;
+            break;
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *start = i;
     }
@@ -496,43 +495,43 @@ static bool skipEscape( const char * buf,
  * @return true if a valid string was present;
  * false otherwise.
  */
-static bool skipString( const char * buf,
-                        size_t * start,
-                        size_t max )
+static bool skipString(const char *buf,
+                       size_t *start,
+                       size_t max)
 {
     bool ret = false;
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    if( ( i < max ) && ( buf[ i ] == '"' ) )
+    if ((i < max) && (buf[i] == '"'))
     {
         i++;
 
-        while( i < max )
+        while (i < max)
         {
-            if( buf[ i ] == '"' )
+            if (buf[i] == '"')
             {
                 ret = true;
                 i++;
                 break;
             }
 
-            if( buf[ i ] == '\\' )
+            if (buf[i] == '\\')
             {
-                if( skipEscape( buf, &i, max ) != true )
+                if (skipEscape(buf, &i, max) != true)
                 {
                     break;
                 }
             }
             /* An unescaped control character is not allowed. */
-            else if( iscntrl_( buf[ i ] ) )
+            else if (iscntrl_((int8_t)buf[i]))
             {
                 break;
             }
-            else if( skipUTF8( buf, &i, max ) != true )
+            else if (skipUTF8(buf, &i, max) != true)
             {
                 break;
             }
@@ -543,7 +542,7 @@ static bool skipString( const char * buf,
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *start = i;
     }
@@ -561,23 +560,23 @@ static bool skipString( const char * buf,
  * @return true if the sequences are the same;
  * false otherwise
  */
-static bool strnEq( const char * a,
-                    const char * b,
-                    size_t n )
+static bool strnEq(const char *a,
+                   const char *b,
+                   size_t n)
 {
     size_t i;
 
-    assert( ( a != NULL ) && ( b != NULL ) );
+    assert((a != NULL) && (b != NULL));
 
-    for( i = 0; i < n; i++ )
+    for (i = 0; i < n; i++)
     {
-        if( a[ i ] != b[ i ] )
+        if (a[i] != b[i])
         {
             break;
         }
     }
 
-    return ( i == n ) ? true : false;
+    return (i == n) ? true : false;
 }
 
 /**
@@ -592,23 +591,23 @@ static bool strnEq( const char * a,
  * @return true if the literal was present;
  * false otherwise.
  */
-static bool skipLiteral( const char * buf,
-                         size_t * start,
-                         size_t max,
-                         const char * literal,
-                         size_t length )
+static bool skipLiteral(const char *buf,
+                        size_t *start,
+                        size_t max,
+                        const char *literal,
+                        size_t length)
 {
     bool ret = false;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
-    assert( literal != NULL );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
+    assert(literal != NULL);
 
-    if( ( *start < max ) && ( length <= ( max - *start ) ) )
+    if ((*start < max) && (length <= (max - *start)))
     {
-        ret = strnEq( &buf[ *start ], literal, length );
+        ret = strnEq(&buf[*start], literal, length);
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *start += length;
     }
@@ -626,16 +625,16 @@ static bool skipLiteral( const char * buf,
  * @return true if a valid literal was present;
  * false otherwise.
  */
-static bool skipAnyLiteral( const char * buf,
-                            size_t * start,
-                            size_t max )
+static bool skipAnyLiteral(const char *buf,
+                           size_t *start,
+                           size_t max)
 {
     bool ret = false;
 
-#define skipLit_( x ) \
-    ( skipLiteral( buf, start, max, ( x ), ( sizeof( x ) - 1UL ) ) == true )
+#define skipLit_(x) \
+    (skipLiteral(buf, start, max, (x), (sizeof(x) - 1UL)) == true)
 
-    if( skipLit_( "true" ) || skipLit_( "false" ) || skipLit_( "null" ) )
+    if (skipLit_("true") || skipLit_("false") || skipLit_("null"))
     {
         ret = true;
     }
@@ -658,34 +657,34 @@ static bool skipAnyLiteral( const char * buf,
  * @return true if a digit was present;
  * false otherwise.
  */
-#define MAX_FACTOR    ( MAX_INDEX_VALUE / 10 )
-static bool skipDigits( const char * buf,
-                        size_t * start,
-                        size_t max,
-                        int32_t * outValue )
+#define MAX_FACTOR (MAX_INDEX_VALUE / 10)
+static bool skipDigits(const char *buf,
+                       size_t *start,
+                       size_t max,
+                       int32_t *outValue)
 {
     bool ret = false;
     size_t i, saveStart;
     int32_t value = 0;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     saveStart = *start;
 
-    for( i = *start; i < max; i++ )
+    for (i = *start; i < max; i++)
     {
-        if( !isdigit_( buf[ i ] ) )
+        if (!isdigit_(buf[i]))
         {
             break;
         }
 
-        if( ( outValue != NULL ) && ( value > -1 ) )
+        if ((outValue != NULL) && (value > -1))
         {
-            int8_t n = ( int8_t ) hexToInt( buf[ i ] );
+            int8_t n = (int8_t)hexToInt(buf[i]);
 
-            if( value <= MAX_FACTOR )
+            if (value <= MAX_FACTOR)
             {
-                value = ( value * 10 ) + n;
+                value = (value * 10) + n;
             }
             else
             {
@@ -694,12 +693,12 @@ static bool skipDigits( const char * buf,
         }
     }
 
-    if( i > saveStart )
+    if (i > saveStart)
     {
         ret = true;
         *start = i;
 
-        if( outValue != NULL )
+        if (outValue != NULL)
         {
             *outValue = value;
         }
@@ -715,21 +714,21 @@ static bool skipDigits( const char * buf,
  * @param[in,out] start  The index at which to begin.
  * @param[in] max  The size of the buffer.
  */
-static void skipDecimals( const char * buf,
-                          size_t * start,
-                          size_t max )
+static void skipDecimals(const char *buf,
+                         size_t *start,
+                         size_t max)
 {
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    if( ( i < max ) && ( buf[ i ] == '.' ) )
+    if ((i < max) && (buf[i] == '.'))
     {
         i++;
 
-        if( skipDigits( buf, &i, max, NULL ) == true )
+        if (skipDigits(buf, &i, max, NULL) == true)
         {
             *start = i;
         }
@@ -743,26 +742,26 @@ static void skipDecimals( const char * buf,
  * @param[in,out] start  The index at which to begin.
  * @param[in] max  The size of the buffer.
  */
-static void skipExponent( const char * buf,
-                          size_t * start,
-                          size_t max )
+static void skipExponent(const char *buf,
+                         size_t *start,
+                         size_t max)
 {
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    if( ( i < max ) && ( ( buf[ i ] == 'e' ) || ( buf[ i ] == 'E' ) ) )
+    if ((i < max) && ((buf[i] == 'e') || (buf[i] == 'E')))
     {
         i++;
 
-        if( ( i < max ) && ( ( buf[ i ] == '-' ) || ( buf[ i ] == '+' ) ) )
+        if ((i < max) && ((buf[i] == '-') || (buf[i] == '+')))
         {
             i++;
         }
 
-        if( skipDigits( buf, &i, max, NULL ) == true )
+        if (skipDigits(buf, &i, max, NULL) == true)
         {
             *start = i;
         }
@@ -779,23 +778,23 @@ static void skipExponent( const char * buf,
  * @return true if a valid number was present;
  * false otherwise.
  */
-static bool skipNumber( const char * buf,
-                        size_t * start,
-                        size_t max )
+static bool skipNumber(const char *buf,
+                       size_t *start,
+                       size_t max)
 {
     bool ret = false;
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    if( ( i < max ) && ( buf[ i ] == '-' ) )
+    if ((i < max) && (buf[i] == '-'))
     {
         i++;
     }
 
-    if( i < max )
+    if (i < max)
     {
         /* JSON disallows superfluous leading zeroes, so an
          * initial zero must either be alone, or followed by
@@ -804,21 +803,21 @@ static bool skipNumber( const char * buf,
          * Should there be a digit after the zero, that digit
          * will not be skipped by this function, and later parsing
          * will judge this an illegal document. */
-        if( buf[ i ] == '0' )
+        if (buf[i] == '0')
         {
             ret = true;
             i++;
         }
         else
         {
-            ret = skipDigits( buf, &i, max, NULL );
+            ret = skipDigits(buf, &i, max, NULL);
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
-        skipDecimals( buf, &i, max );
-        skipExponent( buf, &i, max );
+        skipDecimals(buf, &i, max);
+        skipExponent(buf, &i, max);
         *start = i;
     }
 
@@ -835,15 +834,15 @@ static bool skipNumber( const char * buf,
  * @return true if a scalar value was present;
  * false otherwise.
  */
-static bool skipAnyScalar( const char * buf,
-                           size_t * start,
-                           size_t max )
+static bool skipAnyScalar(const char *buf,
+                          size_t *start,
+                          size_t max)
 {
     bool ret = false;
 
-    if( ( skipString( buf, start, max ) == true ) ||
-        ( skipAnyLiteral( buf, start, max ) == true ) ||
-        ( skipNumber( buf, start, max ) == true ) )
+    if ((skipString(buf, start, max) == true) ||
+        (skipAnyLiteral(buf, start, max) == true) ||
+        (skipNumber(buf, start, max) == true))
     {
         ret = true;
     }
@@ -865,24 +864,24 @@ static bool skipAnyScalar( const char * buf,
  * @return true if a non-terminal comma was present;
  * false otherwise.
  */
-static bool skipSpaceAndComma( const char * buf,
-                               size_t * start,
-                               size_t max )
+static bool skipSpaceAndComma(const char *buf,
+                              size_t *start,
+                              size_t max)
 {
     bool ret = false;
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
-    skipSpace( buf, start, max );
+    skipSpace(buf, start, max);
     i = *start;
 
-    if( ( i < max ) && ( buf[ i ] == ',' ) )
+    if ((i < max) && (buf[i] == ','))
     {
         i++;
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        if( ( i < max ) && !isCloseBracket_( buf[ i ] ) )
+        if ((i < max) && !isCloseBracket_(buf[i]))
         {
             ret = true;
             *start = i;
@@ -901,24 +900,24 @@ static bool skipSpaceAndComma( const char * buf,
  *
  * @note Stops advance if a value is an object or array.
  */
-static void skipArrayScalars( const char * buf,
-                              size_t * start,
-                              size_t max )
+static void skipArrayScalars(const char *buf,
+                             size_t *start,
+                             size_t max)
 {
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    while( i < max )
+    while (i < max)
     {
-        if( skipAnyScalar( buf, &i, max ) != true )
+        if (skipAnyScalar(buf, &i, max) != true)
         {
             break;
         }
 
-        if( skipSpaceAndComma( buf, &i, max ) != true )
+        if (skipSpaceAndComma(buf, &i, max) != true)
         {
             break;
         }
@@ -942,49 +941,49 @@ static void skipArrayScalars( const char * buf,
  *
  * @note Stops advance if a value is an object or array.
  */
-static void skipObjectScalars( const char * buf,
-                               size_t * start,
-                               size_t max )
+static void skipObjectScalars(const char *buf,
+                              size_t *start,
+                              size_t max)
 {
     size_t i;
     bool comma;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    while( i < max )
+    while (i < max)
     {
-        if( skipString( buf, &i, max ) != true )
+        if (skipString(buf, &i, max) != true)
         {
             break;
         }
 
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        if( ( i < max ) && ( buf[ i ] != ':' ) )
+        if ((i < max) && (buf[i] != ':'))
         {
             break;
         }
 
         i++;
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        if( ( i < max ) && isOpenBracket_( buf[ i ] ) )
+        if ((i < max) && isOpenBracket_(buf[i]))
         {
             *start = i;
             break;
         }
 
-        if( skipAnyScalar( buf, &i, max ) != true )
+        if (skipAnyScalar(buf, &i, max) != true)
         {
             break;
         }
 
-        comma = skipSpaceAndComma( buf, &i, max );
+        comma = skipSpaceAndComma(buf, &i, max);
         *start = i;
 
-        if( comma != true )
+        if (comma != true)
         {
             break;
         }
@@ -999,22 +998,22 @@ static void skipObjectScalars( const char * buf,
  * @param[in] max  The size of the buffer.
  * @param[in] mode  The first character of an array '[' or object '{'.
  */
-static void skipScalars( const char * buf,
-                         size_t * start,
-                         size_t max,
-                         char mode )
+static void skipScalars(const char *buf,
+                        size_t *start,
+                        size_t max,
+                        char mode)
 {
-    assert( isOpenBracket_( mode ) );
+    assert(isOpenBracket_(mode));
 
-    skipSpace( buf, start, max );
+    skipSpace(buf, start, max);
 
-    if( mode == '[' )
+    if (mode == '[')
     {
-        skipArrayScalars( buf, start, max );
+        skipArrayScalars(buf, start, max);
     }
     else
     {
-        skipObjectScalars( buf, start, max );
+        skipObjectScalars(buf, start, max);
     }
 }
 
@@ -1034,72 +1033,72 @@ static void skipScalars( const char * buf,
  * #JSONPartial if the buffer contents are potentially valid but incomplete.
  */
 #ifndef JSON_MAX_DEPTH
-    #define JSON_MAX_DEPTH    32
+#define JSON_MAX_DEPTH 32
 #endif
-static JSONStatus_t skipCollection( const char * buf,
-                                    size_t * start,
-                                    size_t max )
+static JSONStatus_t skipCollection(const char *buf,
+                                   size_t *start,
+                                   size_t max)
 {
     JSONStatus_t ret = JSONPartial;
-    char c, stack[ JSON_MAX_DEPTH ];
+    char c, stack[JSON_MAX_DEPTH];
     int16_t depth = -1;
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
 
     i = *start;
 
-    while( i < max )
+    while (i < max)
     {
-        c = buf[ i ];
+        c = buf[i];
         i++;
 
-        switch( c )
+        switch (c)
         {
-            case '{':
-            case '[':
-                depth++;
+        case '{':
+        case '[':
+            depth++;
 
-                if( depth == JSON_MAX_DEPTH )
+            if (depth == JSON_MAX_DEPTH)
+            {
+                ret = JSONMaxDepthExceeded;
+                break;
+            }
+
+            stack[depth] = c;
+            skipScalars(buf, &i, max, stack[depth]);
+            break;
+
+        case '}':
+        case ']':
+
+            if ((depth > 0) && isMatchingBracket_(stack[depth], c))
+            {
+                depth--;
+
+                if (skipSpaceAndComma(buf, &i, max) == true)
                 {
-                    ret = JSONMaxDepthExceeded;
-                    break;
+                    skipScalars(buf, &i, max, stack[depth]);
                 }
 
-                stack[ depth ] = c;
-                skipScalars( buf, &i, max, stack[ depth ] );
                 break;
+            }
 
-            case '}':
-            case ']':
+            ret = (depth == 0) ? JSONSuccess : JSONIllegalDocument;
+            break;
 
-                if( ( depth > 0 ) && isMatchingBracket_( stack[ depth ], c ) )
-                {
-                    depth--;
-
-                    if( skipSpaceAndComma( buf, &i, max ) == true )
-                    {
-                        skipScalars( buf, &i, max, stack[ depth ] );
-                    }
-
-                    break;
-                }
-
-                ret = ( depth == 0 ) ? JSONSuccess : JSONIllegalDocument;
-                break;
-
-            default:
-                ret = JSONIllegalDocument;
-                break;
+        default:
+            ret = JSONIllegalDocument;
+            break;
         }
 
-        if( ret != JSONPartial )
+        if (ret != JSONPartial)
         {
             break;
         }
     }
 
-    if( ret == JSONSuccess )
+    if (ret == JSONSuccess)
     {
         *start = i;
     }
@@ -1115,43 +1114,43 @@ static JSONStatus_t skipCollection( const char * buf,
  * Verify that the entire buffer contains exactly one scalar
  * or collection within optional whitespace.
  */
-JSONStatus_t JSON_Validate( const char * buf,
-                            size_t max )
+JSONStatus_t JSON_Validate(const char *buf,
+                           size_t max)
 {
     JSONStatus_t ret;
     size_t i = 0;
 
-    if( buf == NULL )
+    if (buf == NULL)
     {
         ret = JSONNullParameter;
     }
-    else if( max == 0U )
+    else if (max == 0U)
     {
         ret = JSONBadParameter;
     }
     else
     {
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        /** @cond DO_NOT_DOCUMENT */
-        #ifndef JSON_VALIDATE_COLLECTIONS_ONLY
-            if( skipAnyScalar( buf, &i, max ) == true )
-            {
-                ret = JSONSuccess;
-            }
-            else
-        #endif
+/** @cond DO_NOT_DOCUMENT */
+#ifndef JSON_VALIDATE_COLLECTIONS_ONLY
+        if (skipAnyScalar(buf, &i, max) == true)
+        {
+            ret = JSONSuccess;
+        }
+        else
+#endif
         /** @endcond */
         {
-            ret = skipCollection( buf, &i, max );
+            ret = skipCollection(buf, &i, max);
         }
     }
 
-    if( ( ret == JSONSuccess ) && ( i < max ) )
+    if ((ret == JSONSuccess) && (i < max))
     {
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        if( i != max )
+        if (i != max)
         {
             ret = JSONIllegalDocument;
         }
@@ -1178,23 +1177,23 @@ JSONStatus_t JSON_Validate( const char * buf,
  * @return true if a value was present;
  * false otherwise.
  */
-static bool nextValue( const char * buf,
-                       size_t * start,
-                       size_t max,
-                       size_t * value,
-                       size_t * valueLength )
+static bool nextValue(const char *buf,
+                      size_t *start,
+                      size_t max,
+                      size_t *value,
+                      size_t *valueLength)
 {
     bool ret = true;
     size_t i, valueStart;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
-    assert( ( value != NULL ) && ( valueLength != NULL ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
+    assert((value != NULL) && (valueLength != NULL));
 
     i = *start;
     valueStart = i;
 
-    if( ( skipAnyScalar( buf, &i, max ) == true ) ||
-        ( skipCollection( buf, &i, max ) == JSONSuccess ) )
+    if ((skipAnyScalar(buf, &i, max) == true) ||
+        (skipCollection(buf, &i, max) == JSONSuccess))
     {
         *value = valueStart;
         *valueLength = i - valueStart;
@@ -1204,7 +1203,7 @@ static bool nextValue( const char * buf,
         ret = false;
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *start = i;
     }
@@ -1229,25 +1228,25 @@ static bool nextValue( const char * buf,
  * @return true if a key-value pair was present;
  * false otherwise.
  */
-static bool nextKeyValuePair( const char * buf,
-                              size_t * start,
-                              size_t max,
-                              size_t * key,
-                              size_t * keyLength,
-                              size_t * value,
-                              size_t * valueLength )
+static bool nextKeyValuePair(const char *buf,
+                             size_t *start,
+                             size_t max,
+                             size_t *key,
+                             size_t *keyLength,
+                             size_t *value,
+                             size_t *valueLength)
 {
     bool ret = true;
     size_t i, keyStart;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( max > 0U ) );
-    assert( ( key != NULL ) && ( keyLength != NULL ) );
-    assert( ( value != NULL ) && ( valueLength != NULL ) );
+    assert((buf != NULL) && (start != NULL) && (max > 0U));
+    assert((key != NULL) && (keyLength != NULL));
+    assert((value != NULL) && (valueLength != NULL));
 
     i = *start;
     keyStart = i;
 
-    if( skipString( buf, &i, max ) == true )
+    if (skipString(buf, &i, max) == true)
     {
         *key = keyStart + 1U;
         *keyLength = i - keyStart - 2U;
@@ -1257,14 +1256,14 @@ static bool nextKeyValuePair( const char * buf,
         ret = false;
     }
 
-    if( ret == true )
+    if (ret == true)
     {
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        if( ( i < max ) && ( buf[ i ] == ':' ) )
+        if ((i < max) && (buf[i] == ':'))
         {
             i++;
-            skipSpace( buf, &i, max );
+            skipSpace(buf, &i, max);
         }
         else
         {
@@ -1272,12 +1271,12 @@ static bool nextKeyValuePair( const char * buf,
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
-        ret = nextValue( buf, &i, max, value, valueLength );
+        ret = nextValue(buf, &i, max, value, valueLength);
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *start = i;
     }
@@ -1302,50 +1301,50 @@ static bool nextKeyValuePair( const char * buf,
  *
  * @note Parsing stops upon finding a match.
  */
-static bool objectSearch( const char * buf,
-                          size_t max,
-                          const char * query,
-                          size_t queryLength,
-                          size_t * outValue,
-                          size_t * outValueLength )
+static bool objectSearch(const char *buf,
+                         size_t max,
+                         const char *query,
+                         size_t queryLength,
+                         size_t *outValue,
+                         size_t *outValueLength)
 {
     bool ret = false;
 
     size_t i = 0, key, keyLength, value = 0, valueLength = 0;
 
-    assert( ( buf != NULL ) && ( query != NULL ) );
-    assert( ( outValue != NULL ) && ( outValueLength != NULL ) );
+    assert((buf != NULL) && (query != NULL));
+    assert((outValue != NULL) && (outValueLength != NULL));
 
-    skipSpace( buf, &i, max );
+    skipSpace(buf, &i, max);
 
-    if( ( i < max ) && ( buf[ i ] == '{' ) )
+    if ((i < max) && (buf[i] == '{'))
     {
         i++;
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        while( i < max )
+        while (i < max)
         {
-            if( nextKeyValuePair( buf, &i, max, &key, &keyLength,
-                                  &value, &valueLength ) != true )
+            if (nextKeyValuePair(buf, &i, max, &key, &keyLength,
+                                 &value, &valueLength) != true)
             {
                 break;
             }
 
-            if( ( queryLength == keyLength ) &&
-                ( strnEq( query, &buf[ key ], keyLength ) == true ) )
+            if ((queryLength == keyLength) &&
+                (strnEq(query, &buf[key], keyLength) == true))
             {
                 ret = true;
                 break;
             }
 
-            if( skipSpaceAndComma( buf, &i, max ) != true )
+            if (skipSpaceAndComma(buf, &i, max) != true)
             {
                 break;
             }
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *outValue = value;
         *outValueLength = valueLength;
@@ -1370,40 +1369,40 @@ static bool objectSearch( const char * buf,
  *
  * @note Parsing stops upon finding a match.
  */
-static bool arraySearch( const char * buf,
-                         size_t max,
-                         uint32_t queryIndex,
-                         size_t * outValue,
-                         size_t * outValueLength )
+static bool arraySearch(const char *buf,
+                        size_t max,
+                        uint32_t queryIndex,
+                        size_t *outValue,
+                        size_t *outValueLength)
 {
     bool ret = false;
     size_t i = 0, value = 0, valueLength = 0;
     uint32_t currentIndex = 0;
 
-    assert( buf != NULL );
-    assert( ( outValue != NULL ) && ( outValueLength != NULL ) );
+    assert(buf != NULL);
+    assert((outValue != NULL) && (outValueLength != NULL));
 
-    skipSpace( buf, &i, max );
+    skipSpace(buf, &i, max);
 
-    if( ( i < max ) && ( buf[ i ] == '[' ) )
+    if ((i < max) && (buf[i] == '['))
     {
         i++;
-        skipSpace( buf, &i, max );
+        skipSpace(buf, &i, max);
 
-        while( i < max )
+        while (i < max)
         {
-            if( nextValue( buf, &i, max, &value, &valueLength ) != true )
+            if (nextValue(buf, &i, max, &value, &valueLength) != true)
             {
                 break;
             }
 
-            if( currentIndex == queryIndex )
+            if (currentIndex == queryIndex)
             {
                 ret = true;
                 break;
             }
 
-            if( skipSpaceAndComma( buf, &i, max ) != true )
+            if (skipSpaceAndComma(buf, &i, max) != true)
             {
                 break;
             }
@@ -1412,7 +1411,7 @@ static bool arraySearch( const char * buf,
         }
     }
 
-    if( ret == true )
+    if (ret == true)
     {
         *outValue = value;
         *outValueLength = valueLength;
@@ -1435,29 +1434,29 @@ static bool arraySearch( const char * buf,
  * @return true if a valid string was present;
  * false otherwise.
  */
-#define JSON_QUERY_KEY_SEPARATOR    '.'
-#define isSeparator_( x )    ( ( x ) == JSON_QUERY_KEY_SEPARATOR )
-static bool skipQueryPart( const char * buf,
-                           size_t * start,
-                           size_t max,
-                           size_t * outLength )
+#define JSON_QUERY_KEY_SEPARATOR '.'
+#define isSeparator_(x) ((x) == JSON_QUERY_KEY_SEPARATOR)
+static bool skipQueryPart(const char *buf,
+                          size_t *start,
+                          size_t max,
+                          size_t *outLength)
 {
     bool ret = false;
     size_t i;
 
-    assert( ( buf != NULL ) && ( start != NULL ) && ( outLength != NULL ) );
-    assert( max > 0U );
+    assert((buf != NULL) && (start != NULL) && (outLength != NULL));
+    assert(max > 0U);
 
     i = *start;
 
-    while( ( i < max ) &&
-           !isSeparator_( buf[ i ] ) &&
-           !isSquareOpen_( buf[ i ] ) )
+    while ((i < max) &&
+           !isSeparator_(buf[i]) &&
+           !isSquareOpen_(buf[i]))
     {
         i++;
     }
 
-    if( i > *start )
+    if (i > *start)
     {
         ret = true;
         *outLength = i - *start;
@@ -1484,33 +1483,33 @@ static bool skipQueryPart( const char * buf,
  *
  * @note Parsing stops upon finding a match.
  */
-static JSONStatus_t multiSearch( const char * buf,
-                                 size_t max,
-                                 const char * query,
-                                 size_t queryLength,
-                                 size_t * outValue,
-                                 size_t * outValueLength )
+static JSONStatus_t multiSearch(const char *buf,
+                                size_t max,
+                                const char *query,
+                                size_t queryLength,
+                                size_t *outValue,
+                                size_t *outValueLength)
 {
     JSONStatus_t ret = JSONSuccess;
     size_t i = 0, start = 0, queryStart = 0, value = 0, length = max;
 
-    assert( ( buf != NULL ) && ( query != NULL ) );
-    assert( ( outValue != NULL ) && ( outValueLength != NULL ) );
-    assert( ( max > 0U ) && ( queryLength > 0U ) );
+    assert((buf != NULL) && (query != NULL));
+    assert((outValue != NULL) && (outValueLength != NULL));
+    assert((max > 0U) && (queryLength > 0U));
 
-    while( i < queryLength )
+    while (i < queryLength)
     {
         bool found = false;
 
-        if( isSquareOpen_( query[ i ] ) )
+        if (isSquareOpen_(query[i]))
         {
             int32_t queryIndex = -1;
             i++;
 
-            ( void ) skipDigits( query, &i, queryLength, &queryIndex );
+            (void)skipDigits(query, &i, queryLength, &queryIndex);
 
-            if( ( queryIndex < 0 ) ||
-                ( i >= queryLength ) || !isSquareClose_( query[ i ] ) )
+            if ((queryIndex < 0) ||
+                (i >= queryLength) || !isSquareClose_(query[i]))
             {
                 ret = JSONBadParameter;
                 break;
@@ -1518,7 +1517,7 @@ static JSONStatus_t multiSearch( const char * buf,
 
             i++;
 
-            found = arraySearch( &buf[ start ], length, ( uint32_t ) queryIndex, &value, &length );
+            found = arraySearch(&buf[start], length, (uint32_t)queryIndex, &value, &length);
         }
         else
         {
@@ -1526,18 +1525,18 @@ static JSONStatus_t multiSearch( const char * buf,
 
             queryStart = i;
 
-            if( ( skipQueryPart( query, &i, queryLength, &keyLength ) != true ) ||
+            if ((skipQueryPart(query, &i, queryLength, &keyLength) != true) ||
                 /* catch an empty key part or a trailing separator */
-                ( i == ( queryLength - 1U ) ) )
+                (i == (queryLength - 1U)))
             {
                 ret = JSONBadParameter;
                 break;
             }
 
-            found = objectSearch( &buf[ start ], length, &query[ queryStart ], keyLength, &value, &length );
+            found = objectSearch(&buf[start], length, &query[queryStart], keyLength, &value, &length);
         }
 
-        if( found == false )
+        if (found == false)
         {
             ret = JSONNotFound;
             break;
@@ -1545,13 +1544,13 @@ static JSONStatus_t multiSearch( const char * buf,
 
         start += value;
 
-        if( ( i < queryLength ) && isSeparator_( query[ i ] ) )
+        if ((i < queryLength) && isSeparator_(query[i]))
         {
             i++;
         }
     }
 
-    if( ret == JSONSuccess )
+    if (ret == JSONSuccess)
     {
         *outValue = start;
         *outValueLength = length;
@@ -1568,39 +1567,39 @@ static JSONStatus_t multiSearch( const char * buf,
  *
  * @return an enum of JSONTypes_t
  */
-static JSONTypes_t getType( char c )
+static JSONTypes_t getType(char c)
 {
     JSONTypes_t t;
 
-    switch( c )
+    switch (c)
     {
-        case '"':
-            t = JSONString;
-            break;
+    case '"':
+        t = JSONString;
+        break;
 
-        case '{':
-            t = JSONObject;
-            break;
+    case '{':
+        t = JSONObject;
+        break;
 
-        case '[':
-            t = JSONArray;
-            break;
+    case '[':
+        t = JSONArray;
+        break;
 
-        case 't':
-            t = JSONTrue;
-            break;
+    case 't':
+        t = JSONTrue;
+        break;
 
-        case 'f':
-            t = JSONFalse;
-            break;
+    case 'f':
+        t = JSONFalse;
+        break;
 
-        case 'n':
-            t = JSONNull;
-            break;
+    case 'n':
+        t = JSONNull;
+        break;
 
-        default:
-            t = JSONNumber;
-            break;
+    default:
+        t = JSONNumber;
+        break;
     }
 
     return t;
@@ -1611,45 +1610,45 @@ static JSONTypes_t getType( char c )
 /**
  * See core_json.h for docs.
  */
-JSONStatus_t JSON_SearchConst( const char * buf,
-                               size_t max,
-                               const char * query,
-                               size_t queryLength,
-                               const char ** outValue,
-                               size_t * outValueLength,
-                               JSONTypes_t * outType )
+JSONStatus_t JSON_SearchConst(const char *buf,
+                              size_t max,
+                              const char *query,
+                              size_t queryLength,
+                              const char **outValue,
+                              size_t *outValueLength,
+                              JSONTypes_t *outType)
 {
     JSONStatus_t ret;
     size_t value;
 
-    if( ( buf == NULL ) || ( query == NULL ) ||
-        ( outValue == NULL ) || ( outValueLength == NULL ) )
+    if ((buf == NULL) || (query == NULL) ||
+        (outValue == NULL) || (outValueLength == NULL))
     {
         ret = JSONNullParameter;
     }
-    else if( ( max == 0U ) || ( queryLength == 0U ) )
+    else if ((max == 0U) || (queryLength == 0U))
     {
         ret = JSONBadParameter;
     }
     else
     {
-        ret = multiSearch( buf, max, query, queryLength, &value, outValueLength );
+        ret = multiSearch(buf, max, query, queryLength, &value, outValueLength);
     }
 
-    if( ret == JSONSuccess )
+    if (ret == JSONSuccess)
     {
-        JSONTypes_t t = getType( buf[ value ] );
+        JSONTypes_t t = getType(buf[value]);
 
-        if( t == JSONString )
+        if (t == JSONString)
         {
             /* strip the surrounding quotes */
             value++;
             *outValueLength -= 2U;
         }
 
-        *outValue = &buf[ value ];
+        *outValue = &buf[value];
 
-        if( outType != NULL )
+        if (outType != NULL)
         {
             *outType = t;
         }
@@ -1661,20 +1660,20 @@ JSONStatus_t JSON_SearchConst( const char * buf,
 /**
  * See core_json.h for docs.
  */
-JSONStatus_t JSON_SearchT( char * buf,
-                           size_t max,
-                           const char * query,
-                           size_t queryLength,
-                           char ** outValue,
-                           size_t * outValueLength,
-                           JSONTypes_t * outType )
+JSONStatus_t JSON_SearchT(char *buf,
+                          size_t max,
+                          const char *query,
+                          size_t queryLength,
+                          char **outValue,
+                          size_t *outValueLength,
+                          JSONTypes_t *outType)
 {
     /* MISRA Rule 11.3 prohibits casting a pointer to a different type.
      * This instance is a false positive, as the rule permits the
      * addition of a type qualifier. */
     /* coverity[misra_c_2012_rule_11_3_violation] */
-    return JSON_SearchConst( ( const char * ) buf, max, query, queryLength,
-                             ( const char ** ) outValue, outValueLength, outType );
+    return JSON_SearchConst((const char *)buf, max, query, queryLength,
+                            (const char **)outValue, outValueLength, outType);
 }
 
 /** @cond DO_NOT_DOCUMENT */
@@ -1695,53 +1694,53 @@ JSONStatus_t JSON_SearchT( char * buf,
  * #JSONIllegalDocument if the buffer does not begin with '[' or '{';
  * #JSONNotFound if there are no further values in the collection.
  */
-static JSONStatus_t iterate( const char * buf,
-                             size_t max,
-                             size_t * start,
-                             size_t * next,
-                             size_t * outKey,
-                             size_t * outKeyLength,
-                             size_t * outValue,
-                             size_t * outValueLength )
+static JSONStatus_t iterate(const char *buf,
+                            size_t max,
+                            size_t *start,
+                            size_t *next,
+                            size_t *outKey,
+                            size_t *outKeyLength,
+                            size_t *outValue,
+                            size_t *outValueLength)
 {
     JSONStatus_t ret = JSONNotFound;
     bool found = false;
 
-    assert( ( buf != NULL ) && ( max > 0U ) );
-    assert( ( start != NULL ) && ( next != NULL ) );
-    assert( ( outKey != NULL ) && ( outKeyLength != NULL ) );
-    assert( ( outValue != NULL ) && ( outValueLength != NULL ) );
+    assert((buf != NULL) && (max > 0U));
+    assert((start != NULL) && (next != NULL));
+    assert((outKey != NULL) && (outKeyLength != NULL));
+    assert((outValue != NULL) && (outValueLength != NULL));
 
-    if( *start < max )
+    if (*start < max)
     {
-        switch( buf[ *start ] )
+        switch (buf[*start])
         {
-            case '[':
-                found = nextValue( buf, next, max, outValue, outValueLength );
+        case '[':
+            found = nextValue(buf, next, max, outValue, outValueLength);
 
-                if( found == true )
-                {
-                    *outKey = 0;
-                    *outKeyLength = 0;
-                }
+            if (found == true)
+            {
+                *outKey = 0;
+                *outKeyLength = 0;
+            }
 
-                break;
+            break;
 
-            case '{':
-                found = nextKeyValuePair( buf, next, max, outKey, outKeyLength,
-                                          outValue, outValueLength );
-                break;
+        case '{':
+            found = nextKeyValuePair(buf, next, max, outKey, outKeyLength,
+                                     outValue, outValueLength);
+            break;
 
-            default:
-                ret = JSONIllegalDocument;
-                break;
+        default:
+            ret = JSONIllegalDocument;
+            break;
         }
     }
 
-    if( found == true )
+    if (found == true)
     {
         ret = JSONSuccess;
-        ( void ) skipSpaceAndComma( buf, next, max );
+        (void)skipSpaceAndComma(buf, next, max);
     }
 
     return ret;
@@ -1752,52 +1751,52 @@ static JSONStatus_t iterate( const char * buf,
 /**
  * See core_json.h for docs.
  */
-JSONStatus_t JSON_Iterate( const char * buf,
-                           size_t max,
-                           size_t * start,
-                           size_t * next,
-                           JSONPair_t * outPair )
+JSONStatus_t JSON_Iterate(const char *buf,
+                          size_t max,
+                          size_t *start,
+                          size_t *next,
+                          JSONPair_t *outPair)
 {
     JSONStatus_t ret;
     size_t key, keyLength, value, valueLength;
 
-    if( ( buf == NULL ) || ( start == NULL ) || ( next == NULL ) ||
-        ( outPair == NULL ) )
+    if ((buf == NULL) || (start == NULL) || (next == NULL) ||
+        (outPair == NULL))
     {
         ret = JSONNullParameter;
     }
-    else if( ( max == 0U ) || ( *start >= max ) || ( *next > max ) )
+    else if ((max == 0U) || (*start >= max) || (*next > max))
     {
         ret = JSONBadParameter;
     }
     else
     {
-        skipSpace( buf, start, max );
+        skipSpace(buf, start, max);
 
-        if( *next <= *start )
+        if (*next <= *start)
         {
             *next = *start + 1U;
-            skipSpace( buf, next, max );
+            skipSpace(buf, next, max);
         }
 
-        ret = iterate( buf, max, start, next, &key, &keyLength,
-                       &value, &valueLength );
+        ret = iterate(buf, max, start, next, &key, &keyLength,
+                      &value, &valueLength);
     }
 
-    if( ret == JSONSuccess )
+    if (ret == JSONSuccess)
     {
-        JSONTypes_t t = getType( buf[ value ] );
+        JSONTypes_t t = getType(buf[value]);
 
-        if( t == JSONString )
+        if (t == JSONString)
         {
             /* strip the surrounding quotes */
             value++;
             valueLength -= 2U;
         }
 
-        outPair->key = ( key == 0U ) ? NULL : &buf[ key ];
+        outPair->key = (key == 0U) ? NULL : &buf[key];
         outPair->keyLength = keyLength;
-        outPair->value = &buf[ value ];
+        outPair->value = &buf[value];
         outPair->valueLength = valueLength;
         outPair->jsonType = t;
     }

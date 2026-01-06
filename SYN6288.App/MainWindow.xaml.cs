@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace SYN6288.App
 {
@@ -432,6 +433,49 @@ namespace SYN6288.App
             AliYunSend(JsonConvert.SerializeObject(device).ToLower());
         }
 
+        CancellationTokenSource cts = null;
+        private void btn_TestSetDevice(object sender, RoutedEventArgs e)
+        {
+            var btn = (ToggleButton)sender;
+            //AddInfo(btn.IsChecked.ToString());
+            if (btn.IsChecked == true)
+            {
+                cts = new CancellationTokenSource();
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        int led = 0;
+                        while (true)
+                        {
+                            led = led == 0 ? 1 : 0;
+                            var device = new
+                            {
+                                led = led,
+                            };
+
+                            AliYunSend(JsonConvert.SerializeObject(device).ToLower());
+
+                            await Task.Delay(5000, cts.Token);
+                            if (cts.IsCancellationRequested)
+                                return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AddInfo($"{ex.Message}\r\n{ex}");
+                    }
+
+                }, cts.Token);
+            }
+            else
+            {
+                // Cancel task
+                cts?.Cancel();
+            }
+        }
+
         private void AliYunSend(string json)
         {
             AddInfo($"<< {json}");
@@ -472,5 +516,7 @@ namespace SYN6288.App
                 }
             }
         }
+
+
     }
 }

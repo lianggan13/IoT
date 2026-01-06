@@ -6,7 +6,6 @@
 #include "esp8266.h"
 #include "usart.h"
 #include "flash.h"
-#include <stdio.h>
 
 /*
 *************************************
@@ -49,14 +48,16 @@ uint8_t humi_value = 0;
  */
 void user_init_program(void)
 {
-  test_led();
 
   __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE); // 打开串口2接收中断
   __HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE); // 打开串口3接收中断
 
+  // test_led();
+
   // test_flash();
 
   esp8266_init();
+  
   // OLED_init();
   // while(dht11_init())
   // {

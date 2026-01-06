@@ -317,6 +317,20 @@
                                     </TextBlock>
 
                                     <Button Click="btn_SetDevice">设置</Button>
+                                    <ToggleButton Click="btn_TestSetDevice">
+                                        <ToggleButton.Style>
+                                            <Style TargetType="{x:Type ToggleButton}">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True">
+                                                        <Setter Property="Content" Value="停止测试" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsChecked" Value="False">
+                                                        <Setter Property="Content" Value="开始测试" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ToggleButton.Style>
+                                    </ToggleButton>
 
                                 </StackPanel>
                             </StackPanel>

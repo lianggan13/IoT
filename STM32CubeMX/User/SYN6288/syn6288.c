@@ -9,7 +9,7 @@ extern void SYN6288_ReceivedData(uint8_t receivedByte); // 引用 UART3 的处理函数
 
 void HAL_UART3_IRQHandler(void)
 {
-  unsigned char receive_data = 0;
+  // unsigned char receive_data = 0;
   if (__HAL_UART_GET_FLAG(&huart3, UART_FLAG_RXNE) != RESET)
   {
     uint8_t receivedByte; // 用于存储接收到的字节

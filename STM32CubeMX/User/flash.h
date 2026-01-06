@@ -11,5 +11,6 @@
 
 void Flash_Write(uint32_t addr, uint32_t *Data, uint32_t length);
 void Flash_Read(uint32_t address, uint32_t *data, uint16_t length);
-void test_flash();
+void test_flash(void);
+
 #endif
