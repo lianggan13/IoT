@@ -1,11 +1,8 @@
 #include "syn6288.h"
 #include "usart.h"
-// #include "time_handle.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-extern void SYN6288_ReceivedData(uint8_t receivedByte); // 引用 UART3 的处理函数
 
 void HAL_UART3_IRQHandler(void)
 {
@@ -16,7 +13,7 @@ void HAL_UART3_IRQHandler(void)
 
     HAL_UART_Receive(&huart3, &receivedByte, 1, 1000); // 串口2接收1位数据
 
-    SYN6288_ReceivedData(receivedByte);
+    printf("[SYN6288] >> %c\n", receivedByte);
   }
 }
 
