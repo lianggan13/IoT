@@ -444,29 +444,32 @@ namespace SYN6288.App
 
                 Task.Run(async () =>
                 {
-                    try
+
+                    int led = 0;
+                    while (true)
                     {
-                        int led = 0;
-                        while (true)
+                        led = led == 0 ? 1 : 0;
+                        var device = new
                         {
-                            led = led == 0 ? 1 : 0;
-                            var device = new
-                            {
-                                led = led,
-                            };
+                            led = led,
+                        };
+
+                        try
+                        {
 
                             AliYunSend(JsonConvert.SerializeObject(device).ToLower());
-
-                            await Task.Delay(5000, cts.Token);
                             if (cts.IsCancellationRequested)
-                                return;
+                                break;
+                        }
+                        catch (Exception ex)
+                        {
+                            AddInfo($"{ex.Message}\r\n{ex}");
+                        }
+                        finally
+                        {
+                            await Task.Delay(5000, cts.Token);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        AddInfo($"{ex.Message}\r\n{ex}");
-                    }
-
                 }, cts.Token);
             }
             else
