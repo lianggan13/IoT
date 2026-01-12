@@ -13,15 +13,15 @@
  */
 void user_init_program(void)
 {
-  // __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE); // 打开串口2接收中断
   __HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE); // 打开串口3接收中断
 
   esp8266_init();
-  printf("ESP8266 Init Success!\n");
+  printf("esp8266 init ok!\n");
 
   mqtt_init(&esp8266, 0);
-  printf("MQTT Init Success!\n");
+  printf("mqtt init ok!\n");
 }
+
 /**
  * @brief          初始化函数,相当于Arduino的loop()函数,一直执行该函数
  * @param[in]      none

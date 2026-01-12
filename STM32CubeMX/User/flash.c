@@ -6,14 +6,12 @@
 void flash_read(uint32_t address, uint8_t *data, uint32_t lengthBytes)
 {
     if ((data == NULL) || (lengthBytes == 0))
-    {
         return;
-    }
 
     memcpy(data, (const void *)address, lengthBytes);
 }
 
-void flash_readString(uint32_t addr, char *out, size_t outSize)
+void flash_read_str(uint32_t addr, char *out, size_t outSize)
 {
     if (!out || outSize == 0)
         return;
@@ -37,9 +35,7 @@ void flash_readString(uint32_t addr, char *out, size_t outSize)
 void flash_write(uint32_t addr, const uint8_t *data, uint32_t lengthBytes)
 {
     if ((data == NULL) || (lengthBytes == 0))
-    {
         return;
-    }
 
     HAL_FLASH_Unlock();
 

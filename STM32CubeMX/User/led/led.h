@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include "main.h"
 
-void Set_Green(void);
-void Set_Red(void);
-void Set_Off(void);
+void green(void);
+void red(void);
+void off(void);
 
 #endif

@@ -67,55 +67,7 @@ void mqtt_publish(const char *topic, const char *payload, int qos, int retain, u
     mqtt.esp8266->send(buf, timeoutMs);
 }
 
-uint8_t mqtt_parse_subrecv(
-    const char *line, size_t lineLen,
-    int *outLinkId,
-    const char **outTopic, size_t *outTopicLen,
-    int *outPayloadLen,
-    const char **outJson, size_t *outJsonLen)
-{
-    const char *p = strstr(line, "+MQTTSUBRECV:");
-    if (!p)
-        return 0;
-    p += strlen("+MQTTSUBRECV:");
-
-    char *endptr = NULL;
-    long linkId = strtol(p, &endptr, 10);
-    if (endptr == p || *endptr != ',')
-        return 0;
-    p = endptr + 1;
-
-    if (*p != '"')
-        return 0;
-    const char *topicStart = ++p;
-    const char *topicEnd = strchr(topicStart, '"');
-    if (!topicEnd)
-        return 0;
-
-    p = topicEnd + 1;
-    if (*p != ',')
-        return 0;
-    p++;
-
-    long payloadLen = strtol(p, &endptr, 10);
-    if (endptr == p || *endptr != ',')
-        return 0;
-    p = endptr + 1;
-
-    const char *jsonStart = p;
-    size_t jsonLen = lineLen - (size_t)(jsonStart - line);
-    trim_crlf(&jsonStart, &jsonLen);
-
-    *outLinkId = (int)linkId;
-    *outTopic = topicStart;
-    *outTopicLen = (size_t)(topicEnd - topicStart);
-    *outPayloadLen = (int)payloadLen;
-    *outJson = jsonStart;
-    *outJsonLen = jsonLen;
-    return 1;
-}
-
-uint8_t mqtt_client_parse_subrecv(const char *line, size_t lineLen, MqttSubRecv *out)
+bool mqtt_parse_recv(const char *line, size_t lineLen, MqttSubRecv *out)
 {
     if (!out)
         return 0;
@@ -127,8 +79,38 @@ uint8_t mqtt_client_parse_subrecv(const char *line, size_t lineLen, MqttSubRecv 
     int linkId = 0;
     int payloadLen = 0;
 
-    if (!mqtt_parse_subrecv(line, lineLen, &linkId, &topic, &topicLen, &payloadLen, &json, &jsonLen))
-        return 0;
+    const char *head = "+MQTTSUBRECV:";
+    const char *p = strstr(line, head);
+    if (!p)
+        return false;
+    p += strlen(head);
+
+    char *endptr = NULL;
+    long linkId = strtol(p, &endptr, 10);
+    if (endptr == p || *endptr != ',')
+        return false;
+    p = endptr + 1;
+
+    if (*p != '"')
+        return false;
+    const char *topicStart = ++p;
+    const char *topicEnd = strchr(topicStart, '"');
+    if (!topicEnd)
+        return false;
+
+    p = topicEnd + 1;
+    if (*p != ',')
+        return false;
+    p++;
+
+    long payloadLen = strtol(p, &endptr, 10);
+    if (endptr == p || *endptr != ',')
+        return false;
+    p = endptr + 1;
+
+    const char *jsonStart = p;
+    size_t jsonLen = lineLen - (size_t)(jsonStart - line);
+    trim_crlf(&jsonStart, &jsonLen);
 
     out->linkId = linkId;
     out->topic = topic;
@@ -136,10 +118,10 @@ uint8_t mqtt_client_parse_subrecv(const char *line, size_t lineLen, MqttSubRecv 
     out->payloadLen = payloadLen;
     out->json = json;
     out->jsonLen = jsonLen;
-    return 1;
+    return true;
 }
 
-uint8_t topic_equals(const char *topic, size_t topicLen, const char *expect)
+bool topic_equals(const char *topic, size_t topicLen, const char *expect)
 {
     size_t n = strlen(expect);
     return (topicLen == n) && (memcmp(topic, expect, n) == 0);
@@ -220,11 +202,11 @@ static void handle_aliyun_property_set(const char *json, size_t jsonLen)
         snprintf(payload, sizeof(payload), "{\\\"params\\\":{\\\"led\\\":%d\\}\\,\\\"version\\\":\\\"1.0.0\\\"}", led);
 
         if (led == 1)
-            Set_Red();
+            red();
         else if (led == 0)
-            Set_Green();
+            green();
         else
-            Set_Off();
+            off();
 
         mqtt_publish(PUB_TOPIC, payload, 0, 0, 3000);
     }
@@ -251,10 +233,10 @@ void mqtt_start(void)
 
     while (true)
     {
-        if (mqtt.esp8266->waitRecv(0) == 0) // 等1秒
+        if (mqtt.esp8266->waitRecv(0) == 0)
             continue;
 
-        char *usart2_buf = (char *)(mqtt.esp8266->usart2_buf);
+        char *esp8266_buf = (char *)(mqtt.esp8266->usart2_buf);
         char *mqtt_buf = mqtt.mqtt_buf;
 
         uint16_t recvCount = mqtt.esp8266->usart2_count;
@@ -265,13 +247,13 @@ void mqtt_start(void)
             copyLen = mqttSize - 1;
 
         memset(mqtt_buf, 0, mqttSize);
-        memcpy(mqtt_buf, usart2_buf, copyLen);
+        memcpy(mqtt_buf, esp8266_buf, copyLen);
         mqtt_buf[copyLen] = '\0';
 
         mqtt.esp8266->clearRecv(recvCount);
 
         MqttSubRecv sub;
-        if (mqtt_client_parse_subrecv(mqtt_buf, strlen(mqtt_buf), &sub))
+        if (mqtt_parse_recv(mqtt_buf, strlen(mqtt_buf), &sub))
         {
             if (topic_equals(sub.topic, sub.topicLen, SUB_TOPIC))
             {

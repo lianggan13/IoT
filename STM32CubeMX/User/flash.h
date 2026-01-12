@@ -15,7 +15,7 @@
 void test_flash(void);
 
 void flash_read(uint32_t address, uint8_t *data, uint32_t lengthBytes);
-void flash_readString(uint32_t addr, char *out, size_t outSize);
+void flash_read_str(uint32_t addr, char *out, size_t outSize);
 void flash_write(uint32_t addr, const uint8_t *data, uint32_t lengthBytes);
 
 #endif

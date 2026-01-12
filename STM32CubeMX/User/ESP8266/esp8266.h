@@ -12,11 +12,18 @@
 #include "core_json.h"
 #include "utility.h"
 
+#define ESP8266_STA_MODE 1
+#define ESP8266_AP_MODE 2
+#define ESP8266_STA_AP_MODE 3
+
+#define ESP8266_SINGLE_CONNECTION 0
+#define ESP8266_MULTI_CONNECTION 1
+
 typedef struct Esp8266 Esp8266;
 
 typedef void (*Send)(const char *cmd, uint32_t timeoutMs);
 typedef uint8_t (*WaitRecv)(uint32_t timout);
-typedef void (*ClearRecv)(uint16_t len);
+typedef void (*ClearRecv)(void);
 
 struct Esp8266
 {
