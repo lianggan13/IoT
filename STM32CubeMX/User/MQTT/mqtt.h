@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "core_json.h"
+#include "led.h"
 #include "esp8266.h"
 
 typedef struct Mqtt Mqtt;

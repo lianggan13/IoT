@@ -159,11 +159,11 @@ uint8_t try_send_cmd(char *cmd, uint32_t timout, int8_t retries)
   {
     uart2_send((uint8_t *)buffer, strlen(buffer), timout);
 
-    uint16_t times = 0;
-    while ((esp8266.usart2_count == 0) || (times++ < timout))
+    uint32_t times = 0;
+    while ((esp8266.usart2_count == 0) && (times < timout))
     {
-      times++;
       APP_Delay(1);
+      times++;
     }
 
     HAL_Delay(5000);
@@ -293,10 +293,11 @@ void esp8266_init(void)
   // 启动 USART2 的 1 字节中断接收
   esp8266_uart2_start_rx_it();
 
-  char wifi[128]; // "AT+CWJAP=\"LG13_TPLink_2G\",\"G15608212470*\""
-  Flash_Read(PAGE_ADDRESS(31), (uint32_t *)wifi, sizeof(wifi));
-
   set_sta(); // 设置为 STA 模式
+
+  char wifi[128]; // "AT+CWJAP=\"LG13_TPLink_2G\",\"G15608212470*\""
+  flash_readString(PAGE_ADDRESS(31), wifi, sizeof(wifi));
+
   for (size_t i = 0; i < 5; i++)
   {
     if (connect_wifi(wifi)) // 连接 wifi
@@ -317,8 +318,8 @@ void config_wifi(void)
   char wifi[128];
   char tcp[64];
 
-  Flash_Read(PAGE_ADDRESS(31), (uint32_t *)wifi, sizeof(wifi)); // "AT+CWJAP=\"LG13_TPLink_2G\",\"G15608212470*\""
-  Flash_Read(PAGE_ADDRESS(32), (uint32_t *)tcp, sizeof(tcp));   // "AT+CIPSTART=\"TCP\",\"
+  flash_readString(PAGE_ADDRESS(31), wifi, sizeof(wifi)); // "AT+CWJAP=\"LG13_TPLink_2G\",\"G15608212470*\""
+  flash_readString(PAGE_ADDRESS(32), tcp, sizeof(tcp));   // "AT+CIPSTART=\"TCP\","
 
   // 如果没有连接上 wifi，就启动 AP 模式重新配置 wifi 参数
   // 客户端连接上 AP 后，通过网页配置 wifi 参数，然后保存到 flash 中
@@ -363,8 +364,8 @@ void config_wifi(void)
         pass = connect_tcp(tcp);
         if (pass)
         {
-          Flash_Write(PAGE_ADDRESS(31), (uint32_t *)wifi, sizeof(wifi));
-          Flash_Write(PAGE_ADDRESS(32), (uint32_t *)tcp, sizeof(tcp));
+          flash_write(PAGE_ADDRESS(31), (const uint8_t *)wifi, (uint32_t)strlen(wifi) + 1);
+          flash_write(PAGE_ADDRESS(32), (const uint8_t *)tcp, (uint32_t)strlen(tcp) + 1);
           break;
         }
       }

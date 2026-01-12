@@ -19,8 +19,7 @@ void mqtt_config(int scheme,
                  int certKeyId, int caId, const char *path,
                  uint32_t timeoutMs)
 {
-    Mqtt *client = &mqtt;
-    if (!client->esp8266)
+    if (!mqtt.esp8266)
         return;
 
     if (!clientId)
@@ -34,41 +33,38 @@ void mqtt_config(int scheme,
 
     char buf[256];
     snprintf(buf, sizeof(buf), "AT+MQTTUSERCFG=%d,%d,\"%s\",\"%s\",\"%s\",%d,%d,\"%s\"",
-             client->linkId, scheme, clientId, username, password, certKeyId, caId, path);
-    client->esp8266->send(buf, timeoutMs);
+             mqtt.linkId, scheme, clientId, username, password, certKeyId, caId, path);
+    mqtt.esp8266->send(buf, timeoutMs);
 }
 
 void mqtt_connect(const char *host, int port, int reconnect, uint32_t timeoutMs)
 {
-    Mqtt *client = &mqtt;
-    if (!client->esp8266 || !host)
+    if (!mqtt.esp8266 || !host)
         return;
 
     char buf[200];
-    snprintf(buf, sizeof(buf), "AT+MQTTCONN=%d,\"%s\",%d,%d", client->linkId, host, port, reconnect);
-    client->esp8266->send(buf, timeoutMs);
+    snprintf(buf, sizeof(buf), "AT+MQTTCONN=%d,\"%s\",%d,%d", mqtt.linkId, host, port, reconnect);
+    mqtt.esp8266->send(buf, timeoutMs);
 }
 
 void mqtt_subscribe(const char *topic, int qos, uint32_t timeoutMs)
 {
-    Mqtt *client = &mqtt;
-    if (!client->esp8266 || !topic)
+    if (!mqtt.esp8266 || !topic)
         return;
 
     char buf[200];
-    snprintf(buf, sizeof(buf), "AT+MQTTSUB=%d,\"%s\",%d", client->linkId, topic, qos);
-    client->esp8266->send(buf, timeoutMs);
+    snprintf(buf, sizeof(buf), "AT+MQTTSUB=%d,\"%s\",%d", mqtt.linkId, topic, qos);
+    mqtt.esp8266->send(buf, timeoutMs);
 }
 
 void mqtt_publish(const char *topic, const char *payload, int qos, int retain, uint32_t timeoutMs)
 {
-    Mqtt *client = &mqtt;
-    if (!client->esp8266 || !topic || !payload)
+    if (!mqtt.esp8266 || !topic || !payload)
         return;
 
     char buf[320];
-    snprintf(buf, sizeof(buf), "AT+MQTTPUB=%d,\"%s\",\"%s\",%d,%d", client->linkId, topic, payload, qos, retain);
-    client->esp8266->send(buf, timeoutMs);
+    snprintf(buf, sizeof(buf), "AT+MQTTPUB=%d,\"%s\",\"%s\",%d,%d", mqtt.linkId, topic, payload, qos, retain);
+    mqtt.esp8266->send(buf, timeoutMs);
 }
 
 uint8_t mqtt_parse_subrecv(
@@ -174,7 +170,7 @@ void mqtt_init(Esp8266 *esp8266, int linkId)
 
     // Step 1: 设置 MQTT 用户信息
     // AT+MQTTUSERCFG=<LinkID>,<scheme>,<"client_id">,<"username">,<"password">,<cert_key_ID>,<CA_ID>,<"path">
-    // client_id: 对应 MQTT client ID, 用于标志 client 身份, 最长 256 字节
+    // client_id: 对应 MQTT mqtt ID, 用于标志 mqtt 身份, 最长 256 字节
     // username: 用于登录 MQTT broker 的 username, 最长 64 字节
     // password: 用于登录 MQTT broker 的 password, 最长 64 字节
     // cert_key_ID: 证书 ID, 目前支持一套 cert 证书, 参数为 0
@@ -251,25 +247,20 @@ static void handle_aliyun_property_set(const char *json, size_t jsonLen)
 
 void mqtt_start(void)
 {
-    // char mqtt_buf[256];
-    // memset(mqtt_buf, 0x00, sizeof(mqtt_buf));
+    memset(mqtt.mqtt_buf, 0x00, sizeof(mqtt.mqtt_buf));
 
     while (true)
     {
-        Mqtt *client = &mqtt;
-        Esp8266 *esp = client->esp8266;
-        if (!esp)
-            continue;
-        if (esp->waitRecv(0) == 0)
+        if (mqtt.esp8266->waitRecv(0) == 0) // 等1秒
             continue;
 
-        char *usart2_buf = (char *)(esp->usart2_buf);
-        char *mqtt_buf = client->mqtt_buf;
+        char *usart2_buf = (char *)(mqtt.esp8266->usart2_buf);
+        char *mqtt_buf = mqtt.mqtt_buf;
 
-        uint16_t recvCount = esp->usart2_count;
+        uint16_t recvCount = mqtt.esp8266->usart2_count;
         size_t copyLen = recvCount;
 
-        size_t mqttSize = sizeof(client->mqtt_buf);
+        size_t mqttSize = sizeof(mqtt.mqtt_buf);
         if (copyLen >= mqttSize)
             copyLen = mqttSize - 1;
 
@@ -277,7 +268,7 @@ void mqtt_start(void)
         memcpy(mqtt_buf, usart2_buf, copyLen);
         mqtt_buf[copyLen] = '\0';
 
-        client->esp8266->clearRecv(recvCount);
+        mqtt.esp8266->clearRecv(recvCount);
 
         MqttSubRecv sub;
         if (mqtt_client_parse_subrecv(mqtt_buf, strlen(mqtt_buf), &sub))
